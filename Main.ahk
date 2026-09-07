@@ -605,8 +605,8 @@ sysBar1 := MainGui.Add("Progress", "x0 y3 w700 h39 Disabled Background0A0A0A", 0
 SystemHwnds[sysBar1.Hwnd] := true
 
 MainGui.SetFont("s11 w300 cFFFFFF", "Segoe UI")
-if FileExist(A_WorkingDir "\Resources\aksata.jpg") {
-    sysIcon := MainGui.Add("Picture", "BackgroundTrans x20 y12 w20 h20", A_WorkingDir "\Resources\aksata.jpg")
+if FileExist(A_WorkingDir "\Resources\aksata.png") {
+    sysIcon := MainGui.Add("Picture", "BackgroundTrans x20 y12 w20 h20", A_WorkingDir "\Resources\aksata.png")
     SystemHwnds[sysIcon.Hwnd] := true
 }
 
