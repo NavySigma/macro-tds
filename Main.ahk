@@ -1,4 +1,4 @@
-﻿; Ultimate Macro (macro for TDS) by Darksen
+﻿; Sigmacro (macro for TDS) by Darksen
 ;   Free for anyone to use
 ;   Modifications are welcome, however stealing credit is not.
 ;   You can add your name, but my original credit must remain.
@@ -25,8 +25,8 @@ if (RegExMatch(A_ScriptDir, "i)\.(zip|rar)")) {
     ExitApp()
 }
 
-if WinExist("Ultimate Macro") {
-    WinClose("Ultimate Macro")
+if WinExist("Sigmacro") {
+    WinClose("Sigmacro")
 }
 
 if (A_PtrSize == 4) {
@@ -237,7 +237,7 @@ SC_E:="sc012" ; e
 if (DebugConsole = "1")
     ShowDebugConsole()
 
-IconPath := A_WorkingDir "\icon.ico"
+IconPath := A_WorkingDir "\Resources\aksata.ico"
 if FileExist(IconPath)
     TraySetIcon(IconPath)
 
@@ -605,12 +605,12 @@ sysBar1 := MainGui.Add("Progress", "x0 y3 w700 h39 Disabled Background0A0A0A", 0
 SystemHwnds[sysBar1.Hwnd] := true
 
 MainGui.SetFont("s11 w300 cFFFFFF", "Segoe UI")
-if FileExist(IconPath) {
-    sysIcon := MainGui.Add("Picture", "BackgroundTrans x20 y12 w20 h20", IconPath)
+if FileExist(A_WorkingDir "\Resources\aksata.jpg") {
+    sysIcon := MainGui.Add("Picture", "BackgroundTrans x20 y12 w20 h20", A_WorkingDir "\Resources\aksata.jpg")
     SystemHwnds[sysIcon.Hwnd] := true
 }
 
-global GuiTitleCtrl := MainGui.Add("Text", "x50 y12 w150 h25 BackgroundTrans", "Ultimate Macro | TDS")
+global GuiTitleCtrl := MainGui.Add("Text", "x50 y12 w320 h25 BackgroundTrans", "Sigmacro | Optical Character Recognition")
 GuiTitleCtrl.OnEvent("Click", MoveWindow)
 SystemHwnds[GuiTitleCtrl.Hwnd] := true
 
@@ -1467,7 +1467,7 @@ Auto_Consum.OnEvent("Click", RunAutoConsumableTool)
 ; tab 7 - credits ===========================
 
 MainGui.SetFont("s18 bold cFFFFFF", "Segoe UI")
-global Credit_TITLE := MainGui.Add("Text", "x30 y95 w640 Hidden Center", "Ultimate Macro")
+global Credit_TITLE := MainGui.Add("Text", "x30 y95 w640 Hidden Center", "Sigmacro")
 
 global Credit_Divider := MainGui.Add("Progress", "x80 y132 w530 h2 Hidden Center Background6e6e6e", 0)
 
@@ -1504,7 +1504,7 @@ DiscordImg.OnEvent("Click", DiscordLink)
 global YoutubeImg := MainGui.Add("Picture", "x642 y520 w24 h-1 Hidden BackgroundTrans", "Resources\youtube.png")
 YoutubeImg.OnEvent("Click", YouTubeLink)
 
-MainGui.Title := "Ultimate Macro"
+MainGui.Title := "Sigmacro"
 MainGui.Show("w700 h565")
 
 if (AlwaysOnTop = 1) {
@@ -3563,7 +3563,7 @@ TestWebhook(ctrl, *) {
         whr.Open("POST", v.WebhookLink, false)
         whr.SetRequestHeader("Content-Type", "application/json")
         whr.SetTimeouts(0, 3000, 3000, 3000)
-        whr.Send('{"content": "✅ Webhook test successful! Ultimate Macro TDS is connected."}')
+        whr.Send('{"content": "✅ Webhook test successful! Sigmacro TDS is connected."}')
         if (whr.Status = 200 || whr.Status = 204)
             ModernMsgBox("Success", "Webhook test successful!", "OK")
         else
@@ -3595,7 +3595,7 @@ TestBot(ctrl, *) {
         whr.SetRequestHeader("Authorization", "Bot " v.BotToken)
         whr.SetRequestHeader("Content-Type", "application/json")
         whr.SetTimeouts(0, 3000, 3000, 3000)
-        whr.Send('{"content": "✅ Bot test successful! Ultimate Macro TDS is connected."}')
+        whr.Send('{"content": "✅ Bot test successful! Sigmacro TDS is connected."}')
         
         if (whr.Status = 200 || whr.Status = 201 || whr.Status = 204) {
             ModernMsgBox("Success", "Bot test successful! Message sent to channel.", "OK")
@@ -3661,7 +3661,7 @@ SaveWebhookSettings(ctrl, *) {
         SetTimer(ProcessCommands, 0)
     }
 
-    MsgBox("All discord settings have been successfully saved!", "Ultimate Macro", 0x1040)
+    MsgBox("All discord settings have been successfully saved!", "Sigmacro", 0x1040)
 }
 
 
@@ -3890,7 +3890,7 @@ SaveAllSettings(ctrl, *) {
     SetMouseDelay(MouseDelay)
     SetKeyDelay(KeyDelay)
 
-    MsgBox("All settings have been successfully saved!", "Ultimate Macro", 0x1040)
+    MsgBox("All settings have been successfully saved!", "Sigmacro", 0x1040)
 }
 
 SaveAllSettingsMULTIPLAYER(ctrl, *) {
@@ -8239,7 +8239,7 @@ ProcessCommands(*) {
             }
 
             currentTime := A_Hour ":" A_Min ":" A_Sec
-            statusMsg .= "\n-# Ultimate Macro Bot • " currentTime
+            statusMsg .= "\n-# Sigmacro Bot • " currentTime
 
             Discord.SendEmbed(statusMsg, "3447003")
         }
