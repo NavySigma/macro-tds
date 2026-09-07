@@ -5431,7 +5431,7 @@ checkCondition(*) {
 }
 
 SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
-    global gamemap, difficulty, modifiers, CheckTheMap, LegacyMode
+    global gamemap, difficulty, modifiers, CheckTheMap, LegacyMode, windowX, windowY
 
     getRobloxPos(,,&w,&h)
     readyX := Round(w*0.5)
@@ -5503,9 +5503,10 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
                 }
             }
 
+            GetRobloxClientPos()
             Loop 4 {
                 r := regions[A_Index]
-                pBmp := Gdip_BitmapFromScreen(r[1] "|" r[2] "|" r[3] "|" r[4])
+                pBmp := Gdip_BitmapFromScreen((r[1] + windowX) "|" (r[2] + windowY) "|" r[3] "|" r[4])
                 result := OCR.FromBitmap(pBmp, {lang:langCode, scale:1.5, grayscale: 1}).Text
                 Gdip_DisposeImage(pBmp)
                 if RegExMatch(result, "i)\b" . gamemap . "\b") {
@@ -5635,25 +5636,30 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
 
         Sleep(100)
         SendText(gamemap)
+        mapAttempts := 0
         Loop {
+            mapAttempts++
             Sleep(300)
+            clickedOcr := false
             if (InArray(SpecialMaps, gamemap)) {
                 SelectionICON := AdvancedImageSearch("Resources/Maps/" gamemap "_Selection.png", Round(w*0.1),0,Round(w*0.7),h,0.5,1.5)
             
                 if (SelectionICON.score >= 0.65)  { 
                     Click(SelectionICON.x, SelectionICON.y)
+                    clickedOcr := true
                 } else {
-                    Click(res.x - ScaleX(90), res.y + 80)
+                    clickedOcr := ClickOnMapResult(res, w, h)
                 }
             } else {
-                Click(res.x - ScaleX(90), res.y + 80)
+                clickedOcr := ClickOnMapResult(res, w, h)
             }
             Sleep(400)
 
             changedMap := false
             alrinRotation := false
+            GetRobloxClientPos()
             Loop 2 {
-                if PixelSearch(&gx, &gy, Round(w*0.2), Round(h*0.24), Round(w*0.7), Round(h*0.3), 0x00EC00, 3) {
+                if PixelSearch(&gx, &gy, Round(w*0.2) + windowX, Round(h*0.24) + windowY, Round(w*0.7) + windowX, Round(h*0.3) + windowY, 0x00EC00, 3) {
                     LogToConsole("Successfully changed the map to " gamemap,true,false)
                     changedMap := true
                     break
@@ -5688,10 +5694,17 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
                 continue
             }
 
-            if (!changedMap) {
-                LogToConsole("Failed to change the map to " gamemap, true)
-                SafeReload()
+            ; The OCR click already landed on the map card's name - trust it and move on.
+            if (clickedOcr) {
+                LogToConsole(gamemap " clicked via OCR, proceeding to vote map.", true, false)
+                break
+            }
+
+            if (mapAttempts < 6) {
+                LogToConsole("Map " gamemap " click not confirmed. Retrying (" mapAttempts "/6)...", true, false)
+                Sleep(300)
             } else {
+                LogToConsole("Map " gamemap " not confirmed after " mapAttempts " tries. Proceeding anyway to vote map.", true, false)
                 break
             }
         }
@@ -5752,6 +5765,70 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
 
     Click(readyX, readyY)
     waitReady()
+}
+
+ClickOnMapResult(res, w, h) {
+    global gamemap, windowX, windowY, LegacyMode
+    GetRobloxClientPos()
+
+    langCode := "en-US"
+    for availableLang in StrSplit(OCR.GetAvailableLanguages(), "`n", "`r") {
+        if (availableLang != "" && SubStr(availableLang, 1, 2) = "en") {
+            langCode := availableLang
+            break
+        }
+    }
+
+    ; Search area: just below the search bar, bounded to keep OCR fast & under size limits.
+    ocrX := Max(0, res.x - ScaleX(150))
+    ocrY := Max(0, res.y + 40)
+    ocrW := Min(Round(w * 0.7), 900)
+    ocrH := Min(Round(h * 0.35), 400)
+
+    ; Layout below the search bar: filter row (All/Easy/Normal/...) then the 1:1 map cards.
+    ; Scan several rows & columns past the filter row, hover each card so its name appears,
+    ; and click the one whose name matches the map we want.
+    foundOcr := false
+    rowY := res.y + ScaleY(110)
+    scanEnd := res.y + ScaleY(340)
+    scanStep := ScaleY(35)
+    xOffsets := [0, -ScaleX(60), ScaleX(60), -ScaleX(120), ScaleX(120)]
+
+    while (rowY <= scanEnd && !foundOcr) {
+        for xOff in xOffsets {
+            candyX := res.x + xOff
+            MouseMove(candyX, rowY)
+            Sleep(200)
+            try {
+                oc := OCR.FromRect(ocrX, ocrY, ocrW, ocrH, {lang: langCode, scale: 2, grayscale: 1})
+                fnd := oc.FindString(gamemap, {CaseSense: false})
+                if (fnd.HasProp("x") && fnd.HasProp("y") && fnd.x > 0 && fnd.y > 0) {
+                    tX := fnd.x + fnd.w//2
+                    tY := fnd.y + fnd.h//2
+                    MouseMove(tX, tY)
+                    Sleep(120)
+                    Click
+                    LogToConsole("Map " gamemap " clicked via OCR at (" tX "," tY ")", true, false)
+                    foundOcr := true
+                    break
+                }
+            } catch {
+                ; name not visible at this card, keep scanning
+            }
+        }
+        rowY := rowY + scanStep
+    }
+
+    if (!foundOcr) {
+        ; Fallback: click at the expected first card position below the filter row.
+        fx := res.x - ScaleX(90)
+        fy := res.y + ScaleY(160)
+        MouseMove(fx, fy)
+        Sleep(150)
+        Click
+        LogToConsole("Fallback click for " gamemap " at (" fx "," fy ")", true, false)
+    }
+    return foundOcr
 }
 
 CheckTheMapF() {
@@ -5916,13 +5993,13 @@ activateTimescale() {
 
         Sleep(250)
 
-        ; Out of tickets -> "Get More" popup. Cancel it and disable timescale.
-        resMore := AdvancedImageSearch("Resources/GetMore.png", 0, 0, w, h)
+        ; --- 1) "Get More" present -> out of tickets. Cancel and disable timescale. ---
+        resMore := AdvancedImageSearch("Resources/GetMore.png", 0, 0, w, h, 0.6, 1.5)
         LogToConsole("Timescale debug: GetMore -> status=" resMore.status " score=" resMore.score " at(" resMore.x "," resMore.y ")")
-        if (resMore.status = "success" && resMore.score >= 0.6) {
+        if (resMore.status = "success" && resMore.score >= 0.5) {
             LogToConsole("Timescale: out of tickets! Cancelling the popup.", true, false)
-            resCancel := AdvancedImageSearch("Resources/cancel.png", 0, 0, w, h)
-            if (resCancel.status = "success" && resCancel.score >= 0.55) {
+            resCancel := AdvancedImageSearch("Resources/cancel.png", 0, 0, w, h, 0.6, 1.5)
+            if (resCancel.status = "success" && resCancel.score >= 0.5) {
                 Click(resCancel.x, resCancel.y)
                 LogToConsole("Timescale: clicked cancel at (" resCancel.x "," resCancel.y "). Timescale disabled.", true, false)
             }
@@ -5932,21 +6009,61 @@ activateTimescale() {
             return
         }
 
-        ; Otherwise -> confirm the ticket purchase.
-        res := AdvancedImageSearch("Resources/confirmtimescale.png", 0, 0, w, h)
-        LogToConsole("Timescale debug: confirmtimescale -> status=" res.status " score=" res.score " at(" res.x "," res.y ")")
-        if (res.status = "success" && res.score >= 0.55) {
-            Click(res.x, res.y)
-            LogToConsole("Timescale: clicked confirmtimescale at (" res.x "," res.y ")")
-        } else {
-            res := AdvancedImageSearch("Resources/confirm.png", 0, 0, w, h)
-            LogToConsole("Timescale debug: confirm.png -> status=" res.status " score=" res.score " at(" res.x "," res.y ")")
-            if (res.status = "success" && res.score >= 0.55) {
+        ; --- 2) Confirm button present -> use a ticket and activate timescale. ---
+        ; The unlock vs confirm popup frames look nearly identical (only the button
+        ; differs), so the confirm BUTTON is detected before deciding Confirm/Cancel.
+        resConfirmBtn := AdvancedImageSearch("Resources/confirmtimescale.png", 0, 0, w, h, 0.6, 1.5)
+        LogToConsole("Timescale debug: confirmtimescale -> status=" resConfirmBtn.status " score=" resConfirmBtn.score " at(" resConfirmBtn.x "," resConfirmBtn.y ")")
+        resConfirmGeneric := AdvancedImageSearch("Resources/confirm.png", 0, 0, w, h, 0.6, 1.5)
+        LogToConsole("Timescale debug: confirm.png -> status=" resConfirmGeneric.status " score=" resConfirmGeneric.score " at(" resConfirmGeneric.x "," resConfirmGeneric.y ")")
+        resConfPopup := AdvancedImageSearch("Resources/confirmpopuptime.png", 0, 0, w, h, 0.6, 1.5)
+        LogToConsole("Timescale debug: confirmpopuptime -> status=" resConfPopup.status " score=" resConfPopup.score " at(" resConfPopup.x "," resConfPopup.y ")")
+
+        confButtonClicked := false
+        if (resConfirmBtn.status = "success" && resConfirmBtn.score >= 0.5) {
+            Click(resConfirmBtn.x, resConfirmBtn.y)
+            LogToConsole("Timescale: clicked confirm button at (" resConfirmBtn.x "," resConfirmBtn.y ")")
+            confButtonClicked := true
+        } else if (resConfirmGeneric.status = "success" && resConfirmGeneric.score >= 0.5) {
+            Click(resConfirmGeneric.x, resConfirmGeneric.y)
+            LogToConsole("Timescale: clicked confirm at (" resConfirmGeneric.x "," resConfirmGeneric.y ")")
+            confButtonClicked := true
+        } else if (resConfPopup.status = "success" && resConfPopup.score >= 0.5) {
+            LogToConsole("Timescale: confirm popup found. Clicking confirm.", true, false)
+            res := AdvancedImageSearch("Resources/confirmtimescale.png", 0, 0, w, h, 0.6, 1.5)
+            if (res.status = "success" && res.score >= 0.5) {
                 Click(res.x, res.y)
-                LogToConsole("Timescale: clicked confirm.png at (" res.x "," res.y ")")
+                LogToConsole("Timescale: clicked confirm button at (" res.x "," res.y ")")
+                confButtonClicked := true
+            } else {
+                res := AdvancedImageSearch("Resources/confirm.png", 0, 0, w, h, 0.6, 1.5)
+                if (res.status = "success" && res.score >= 0.5) {
+                    Click(res.x, res.y)
+                    LogToConsole("Timescale: clicked confirm at (" res.x "," res.y ")")
+                    confButtonClicked := true
+                }
+            }
+        }
+
+        if (!confButtonClicked) {
+            ; --- 3) No confirm button visible -> unlock / get-more popup. Cancel to skip. ---
+            resUnlock := AdvancedImageSearch("Resources/unlocktimescale.png", 0, 0, w, h, 0.6, 1.5)
+            LogToConsole("Timescale debug: unlocktimescale -> status=" resUnlock.status " score=" resUnlock.score " at(" resUnlock.x "," resUnlock.y ")")
+            resCancel := AdvancedImageSearch("Resources/cancel.png", 0, 0, w, h, 0.6, 1.5)
+            if (resCancel.status = "success" && resCancel.score >= 0.55) {
+                Click(resCancel.x, resCancel.y)
+                LogToConsole("Timescale: clicked cancel at (" resCancel.x "," resCancel.y "). Timescale disabled.", true, false)
+                TimescaleActive := false
+            } else if (resUnlock.status = "success" && resUnlock.score >= 0.55) {
+                LogToConsole("Timescale: unlock popup found. Cancelling to skip timescale.", true, false)
+                TimescaleActive := false
             } else {
                 LogToConsole("failed to activate timescale. the macro can't see the confirm/get more button...", true)
+                TimescaleActive := false
             }
+            Send("{sc02B}")
+            Send("#")
+            return
         }
 
         timescales := IniRead(StateFile, "State", "Timescale", 0)
@@ -7917,6 +8034,7 @@ StratInfo(title := "unknown strat", author := "darksen", RequiredTowrs := "error
 ; ReadMessage(["already", "current", "rotation"]), for example
 ; works only with red color
 ReadMessage(includeStr := "", includeRx := "", excludeStr := "", excludeRx := "") {
+    global windowX, windowY
     langCode := "en-US"
     for availableLang in StrSplit(OCR.GetAvailableLanguages(), "`n", "`r") {
         if (availableLang != "" && SubStr(availableLang, 1, 2) = "en") {
@@ -7926,8 +8044,9 @@ ReadMessage(includeStr := "", includeRx := "", excludeStr := "", excludeRx := ""
     }
 
     getRobloxPos(,,&w,&h)
-    x := Round(w * 0.2), y := Round(h * 0.18)
-    width := Round(w * 0.7) - x, height := Round(h * 0.35) - y
+    GetRobloxClientPos()
+    x := Round(w * 0.2) + windowX, y := Round(h * 0.18) + windowY
+    width := Round(w * 0.7) - Round(w * 0.2), height := Round(h * 0.35) - Round(h * 0.18)
 
     if (width <= 0 || height <= 0)
         return false
