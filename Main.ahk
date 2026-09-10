@@ -2851,19 +2851,38 @@ ChangeTargetsHK(*) {
         LastOpenedTowerID := towerID
     }
 
-    targetBox := InputBox("Enter the target:", "Change Targets", "w300 h100", "")
-    if (targetBox.Result = "Cancel")
+    target := SelectTargetDialog(towerID)
+    if (target = "")
         return
-
-    target := Trim(targetBox.Value)
-    if (target = "") {
-        return
-    }
 
     ChangeTargets(towerID, target)
 
     RecordedSteps.Push("ChangeTargets(" towerID ", " target ")")
     LogToConsole("Recorded ChangeTargets(" towerID ", " target ")")
+}
+
+global ActiveTargetSelectTowerID := ""
+
+SelectTargetDialog(towerID) {
+    global ActiveTargetSelectTowerID
+    ActiveTargetSelectTowerID := ""
+    tgGui := Gui("+AlwaysOnTop", "Change Targets")
+    tgGui.SetFont("s11 w400", "Segoe UI")
+    tgGui.Add("Text", "x20 y20 w250", "Select target for tower " towerID)
+    dd := tgGui.Add("DropDownList", "x20 y+10 w250", ["First Enemy", "Last Enemy", "Strongest", "Weakest", "Closest", "Farthest", "Random"])
+    dd.Value := 1
+    okBtn := tgGui.Add("Button", "x20 y+15 w115 h32 Default", "OK")
+    okBtn.OnEvent("Click", (*) => ConfirmTargetSelect(tgGui, dd.Text))
+    tgGui.Add("Button", "x+10 w115 h32", "Cancel").OnEvent("Click", (*) => tgGui.Destroy())
+    tgGui.Show("w290 h150")
+    WinWaitClose("ahk_id " tgGui.Hwnd)
+    return ActiveTargetSelectTowerID
+}
+
+ConfirmTargetSelect(tgGui, target) {
+    global ActiveTargetSelectTowerID
+    ActiveTargetSelectTowerID := target
+    tgGui.Destroy()
 }
 
 ;PATHS =======================================
@@ -2954,7 +2973,22 @@ ToggleAutoskip() {
 ChangeTargets(towerID, target) {
     global LastOpenedTowerID, needtocheckTowerUI, Towers, PotatoMode, ResV2, ResV1, canBeUpgraded, unfocusX, unfocusY
     canUseAbility := false
-    
+
+    targets := ["First Enemy", "Last Enemy", "Strongest", "Weakest", "Closest", "Farthest", "Random"]
+
+    normalizedTarget := ""
+    for index, name in targets {
+        if (StrLower(name) == StrLower(Trim(target))) {
+            normalizedTarget := name
+            break
+        }
+    }
+    if (normalizedTarget = "") {
+        LogToConsole("Invalid target '" target "'! Valid targets: First Enemy, Last Enemy, Strongest, Weakest, Closest, Farthest, Random", true)
+        return false
+    }
+    target := normalizedTarget
+
     if (LastOpenedTowerID != towerID) {
         Click(Towers[towerID].x, Towers[towerID].y)
         Sleep 250
@@ -2965,7 +2999,6 @@ ChangeTargets(towerID, target) {
     LastOpenedTowerID := towerID
     needtocheckTowerUI := true
     attempts := 0
-    targets := ["First Enemy", "Last Enemy", "Strongest", "Weakest", "Closest", "Farthest", "Random"]
 
     LogToConsole("Changing " towerID " targets to " target "...")
 
