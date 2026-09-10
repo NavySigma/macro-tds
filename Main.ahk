@@ -4440,8 +4440,41 @@ LowerGraphics() {
     SendEvent("{SC02A up}")
 }
 
+FindItemsViaOcr(rw, rh) {
+    global windowX, windowY
+    GetRobloxClientPos()
+
+    langCode := "en-US"
+    for availableLang in StrSplit(OCR.GetAvailableLanguages(), "`n", "`r") {
+        if (availableLang != "" && SubStr(availableLang, 1, 2) = "en") {
+            langCode := availableLang
+            break
+        }
+    }
+
+    bands := [[0, 0, Round(rw*0.4), Round(rh*0.33)],
+              [0, Round(rh*0.33), Round(rw*0.4), Round(rh*0.33)],
+              [0, Round(rh*0.66), Round(rw*0.4), Round(rh*0.34)]]
+    for band in bands {
+        try {
+            oc := OCR.FromRect(band[1], band[2], band[3], band[4], {lang: langCode, scale: 1.5, grayscale: 1})
+            fnd := oc.FindString("Items", {CaseSense: false})
+            if (fnd.HasProp("x") && fnd.HasProp("y") && fnd.x > 0 && fnd.y > 0) {
+                return {x: fnd.x + fnd.w//2, y: fnd.y + fnd.h//2, score: 1}
+            }
+        } catch {
+        }
+    }
+    return {x: 0, y: 0, score: 0}
+}
+
 EquipTowers(towers) {
     getRobloxPos(,,&rw,&rh)
+
+    DebugLog := A_AppData "\Ultimate_Macro\equip_debug.log"
+    DirCreate(A_AppData "\Ultimate_Macro")
+    try FileDelete(DebugLog)
+    FileAppend("=== EquipTowers start === w=" rw " h=" rh " towers=" towers "`n", DebugLog)
 
     savedCloseX := 0
     savedCloseY := 0
@@ -4449,96 +4482,78 @@ EquipTowers(towers) {
     closeChat()
     Sleep(600)
 
-    StartTime := A_TickCount
-    Loop {
-        W := Round(rw * 0.3)
-        H := rh - 0
+    openedMenu := false
+    openDeadline := A_TickCount + 30000
+    attempt := 0
+    bestItemsScore := 0
+    bestCloseScore := 0
+    while (!openedMenu && A_TickCount < openDeadline) {
+        attempt++
 
-        resItems := AdvancedImageSearch("Resources\items.png", 0, 0, W, H)
-        if (resItems.status == "success" && resItems.score > 0.56) {
+        resItems := AdvancedImageSearch("Resources\items.png", 0, 0, rw, rh)
+        if (resItems.score > bestItemsScore)
+            bestItemsScore := resItems.score
+        if (resItems.status == "success" && resItems.score > 0.52) {
             fx := resItems.x
             fy := resItems.y
+            FileAppend("[" A_TickCount "] attempt " attempt ": items.png FOUND score=" resItems.score " at " fx "," fy "`n", DebugLog)
             MouseMove(fx, fy+ScaleY(7), A_DefaultMouseSpeed+1)
             Sleep(100)
             MouseClick()
-            break
-        } 
-        if (A_TickCount - StartTime > 4000) {
-            break
-        }
-        Sleep(500)
-    }
-
-    Sleep(800)
-
-    openedMenu := false
-    StartTime := A_TickCount
-    Loop {
-        X1 := Round(rw * 0.2)
-        Y1 := 0
-        W := Round(rw * 1) - X1
-        H := Round(rh * 0.4) - Y1
-        resclose := AdvancedImageSearch("Resources\close_items.png", X1, Y1, W, H)
-
-        If (resclose.status = "success" && resclose.score >= 0.85) {
-            openedMenu := true
-            savedCloseX := resclose.x
-            savedCloseY := resclose.y
-            break
-        } 
-        if (A_TickCount - StartTime > 4000)
-            break
-        Sleep(500)
-    }
-
-    if (!openedMenu) {
-        StartTime := A_TickCount
-
-        W := Round(rw * 0.3)
-        H := rh - 0
-
-        Loop {
-            resItems := AdvancedImageSearch("Resources\items.png", 0, 0, W, H)
-            if (resItems.status == "success" && resItems.score > 0.56) {
-                fx := resItems.x
-                fy := resItems.y
+            LogToConsole("EquipTowers: Items button FOUND (score " resItems.score ") at " fx ", " fy " | attempt " attempt, true, false)
+        } else {
+            FileAppend("[" A_TickCount "] attempt " attempt ": items.png NOT found status=" resItems.status " score=" resItems.score "`n", DebugLog)
+            LogToConsole("EquipTowers: items.png NOT found (status=" resItems.status ", score=" resItems.score ") | attempt " attempt, true, false)
+            ocrItems := FindItemsViaOcr(rw, rh)
+            if (ocrItems.score > 0 && ocrItems.x > 0 && ocrItems.y > 0) {
+                fx := ocrItems.x
+                fy := ocrItems.y
+                FileAppend("[" A_TickCount "] attempt " attempt ": OCR FOUND 'Items' at " fx "," fy "`n", DebugLog)
+                LogToConsole("EquipTowers: OCR FOUND 'Items' at " fx ", " fy " | attempt " attempt, true, false)
                 MouseMove(fx, fy+ScaleY(7), A_DefaultMouseSpeed+1)
                 Sleep(100)
                 MouseClick()
-                break
-            } 
-
-            if (A_TickCount - StartTime > 5000)
-                break
+            } else {
+                FileAppend("[" A_TickCount "] attempt " attempt ": OCR 'Items' NOT found`n", DebugLog)
+                Sleep(500)
+                continue
+            }
         }
 
-        openedMenu := false
-        StartTime := A_TickCount
-        Loop {
-            X1 := Round(rw * 0.2)
-            Y1 := 0
-            W := Round(rw * 1) - X1
-            H := Round(rh * 0.4) - Y1
+        X1 := Round(rw * 0.15)
+        Y1 := 0
+        W := rw - X1
+        H := Round(rh * 0.4)
+        waitUntil := A_TickCount + 6000
+        while (A_TickCount < waitUntil) {
             resclose := AdvancedImageSearch("Resources\close_items.png", X1, Y1, W, H)
-
-            If (resclose.status = "success" && resclose.score >= 0.85) {
+            if (resclose.score > bestCloseScore)
+                bestCloseScore := resclose.score
+            if (resclose.status == "success" && resclose.score >= 0.70) {
                 openedMenu := true
                 savedCloseX := resclose.x
                 savedCloseY := resclose.y
                 break
-            } 
-
-            if (A_TickCount - StartTime > 2000)
-                break
-            Sleep(500)
+            }
+            Sleep(400)
         }
+        FileAppend("[" A_TickCount "] attempt " attempt ": close_items.png check status=" resclose.status " score=" resclose.score "`n", DebugLog)
+        LogToConsole("EquipTowers: close_items.png check done (status=" resclose.status ", score=" resclose.score ")", true, false)
+    }
 
-        if (!openedMenu) {
-            LogToConsole("Failed to equip towers! The macro can't see the towers menu! Reloading...", true, false)
-            Sleep 400
-            SafeReload()
-            return
-        }
+    FileAppend("=== EquipTowers end === openedMenu=" openedMenu " bestItemsScore=" bestItemsScore " bestCloseScore=" bestCloseScore "`n", DebugLog)
+
+    if (!openedMenu) {
+        getRobloxPos(&spX, &spY, &rW, &rH)
+        spBmp := Gdip_BitmapFromScreen(spX "|" spY "|" rW "|" rH)
+        spPath := A_AppData "\Ultimate_Macro\equip_fail.png"
+        Gdip_SaveBitmapToFile(spBmp, spPath)
+        Gdip_DisposeImage(spBmp)
+        FileAppend("Screenshot saved to " spPath " (screencoords " spX "," spY " size " rW "x" rH ")`n", DebugLog)
+        LogToConsole("Failed to equip towers! The macro can't see the towers menu! Reloading...", true, false)
+        Sleep 400
+        SafeReload()
+        return
     }
 
     srchX := ScaleX(484)
