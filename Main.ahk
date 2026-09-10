@@ -4440,34 +4440,6 @@ LowerGraphics() {
     SendEvent("{SC02A up}")
 }
 
-FindItemsViaOcr(rw, rh) {
-    global windowX, windowY
-    GetRobloxClientPos()
-
-    langCode := "en-US"
-    for availableLang in StrSplit(OCR.GetAvailableLanguages(), "`n", "`r") {
-        if (availableLang != "" && SubStr(availableLang, 1, 2) = "en") {
-            langCode := availableLang
-            break
-        }
-    }
-
-    bands := [[0, 0, Round(rw*0.4), Round(rh*0.33)],
-              [0, Round(rh*0.33), Round(rw*0.4), Round(rh*0.33)],
-              [0, Round(rh*0.66), Round(rw*0.4), Round(rh*0.34)]]
-    for band in bands {
-        try {
-            oc := OCR.FromRect(band[1], band[2], band[3], band[4], {lang: langCode, scale: 1.5, grayscale: 1})
-            fnd := oc.FindString("Items", {CaseSense: false})
-            if (fnd.HasProp("x") && fnd.HasProp("y") && fnd.x > 0 && fnd.y > 0) {
-                return {x: fnd.x + fnd.w//2, y: fnd.y + fnd.h//2, score: 1}
-            }
-        } catch {
-        }
-    }
-    return {x: 0, y: 0, score: 0}
-}
-
 EquipTowers(towers) {
     getRobloxPos(,,&rw,&rh)
 
@@ -4482,63 +4454,71 @@ EquipTowers(towers) {
     closeChat()
     Sleep(600)
 
+    ; Tunggu popup vote/iklan yang lewat sendiri habis dulu sebelum cari tombol Items
+    LogToConsole("EquipTowers: waiting 5s for join popup/vote to pass...", true, false)
+    Sleep(5000)
+    FileAppend("[" A_TickCount "] waited 5s for join popup/vote`n", DebugLog)
+
     openedMenu := false
     openDeadline := A_TickCount + 30000
     attempt := 0
     bestItemsScore := 0
     bestCloseScore := 0
-    while (!openedMenu && A_TickCount < openDeadline) {
-        attempt++
+    bestSearchScore := 0
+    savedItemsX := 0
+    savedItemsY := 0
 
+    X1 := Round(rw * 0.15)
+    Y1 := 0
+    W := rw - X1
+    H := Round(rh * 0.4)
+    srchRegionX := Round(rh*0.5)
+    srchRegionY := Round(rh*0.5)
+
+    ; Fase 1: cari tombol Items sampai kelihatan
+    while (A_TickCount < openDeadline && (savedItemsX = 0 || savedItemsY = 0)) {
+        attempt++
         resItems := AdvancedImageSearch("Resources\items.png", 0, 0, rw, rh)
         if (resItems.score > bestItemsScore)
             bestItemsScore := resItems.score
         if (resItems.status == "success" && resItems.score > 0.52) {
-            fx := resItems.x
-            fy := resItems.y
-            FileAppend("[" A_TickCount "] attempt " attempt ": items.png FOUND score=" resItems.score " at " fx "," fy "`n", DebugLog)
-            MouseMove(fx, fy+ScaleY(7), A_DefaultMouseSpeed+1)
-            Sleep(100)
-            MouseClick()
-            LogToConsole("EquipTowers: Items button FOUND (score " resItems.score ") at " fx ", " fy " | attempt " attempt, true, false)
+            savedItemsX := resItems.x
+            savedItemsY := resItems.y
+            FileAppend("[" A_TickCount "] phase1 attempt " attempt ": items.png FOUND score=" resItems.score " at " savedItemsX "," savedItemsY "`n", DebugLog)
+            LogToConsole("EquipTowers: Items button FOUND (score " resItems.score ") at " savedItemsX ", " savedItemsY " | attempt " attempt, true, false)
         } else {
-            FileAppend("[" A_TickCount "] attempt " attempt ": items.png NOT found status=" resItems.status " score=" resItems.score "`n", DebugLog)
+            FileAppend("[" A_TickCount "] phase1 attempt " attempt ": items.png NOT found status=" resItems.status " score=" resItems.score "`n", DebugLog)
             LogToConsole("EquipTowers: items.png NOT found (status=" resItems.status ", score=" resItems.score ") | attempt " attempt, true, false)
-            ocrItems := FindItemsViaOcr(rw, rh)
-            if (ocrItems.score > 0 && ocrItems.x > 0 && ocrItems.y > 0) {
-                fx := ocrItems.x
-                fy := ocrItems.y
-                FileAppend("[" A_TickCount "] attempt " attempt ": OCR FOUND 'Items' at " fx "," fy "`n", DebugLog)
-                LogToConsole("EquipTowers: OCR FOUND 'Items' at " fx ", " fy " | attempt " attempt, true, false)
-                MouseMove(fx, fy+ScaleY(7), A_DefaultMouseSpeed+1)
-                Sleep(100)
-                MouseClick()
-            } else {
-                FileAppend("[" A_TickCount "] attempt " attempt ": OCR 'Items' NOT found`n", DebugLog)
-                Sleep(500)
-                continue
-            }
+            Sleep(500)
         }
+    }
 
-        X1 := Round(rw * 0.15)
-        Y1 := 0
-        W := rw - X1
-        H := Round(rh * 0.4)
-        waitUntil := A_TickCount + 6000
-        while (A_TickCount < waitUntil) {
-            resclose := AdvancedImageSearch("Resources\close_items.png", X1, Y1, W, H)
-            if (resclose.score > bestCloseScore)
-                bestCloseScore := resclose.score
-            if (resclose.status == "success" && resclose.score >= 0.70) {
-                openedMenu := true
-                savedCloseX := resclose.x
-                savedCloseY := resclose.y
-                break
-            }
-            Sleep(400)
+    ; Fase 2: spam klik di titik tombol sampai searchbar muncul
+    while (!openedMenu && A_TickCount < openDeadline && (savedItemsX != 0 && savedItemsY != 0)) {
+        attempt++
+        MouseMove(savedItemsX, savedItemsY + ScaleY(7), A_DefaultMouseSpeed+1)
+        Sleep(100)
+        MouseClick()
+        FileAppend("[" A_TickCount "] phase2 attempt " attempt ": clicked Items at " savedItemsX "," savedItemsY "`n", DebugLog)
+        LogToConsole("EquipTowers: clicked Items at " savedItemsX ", " savedItemsY " | attempt " attempt, true, false)
+
+        resSearch := AdvancedImageSearch("Resources\searchbar_items.png", 0, 0, srchRegionX, srchRegionY)
+        if (resSearch.score > bestSearchScore)
+            bestSearchScore := resSearch.score
+        resclose := AdvancedImageSearch("Resources\close_items.png", X1, Y1, W, H)
+        if (resclose.score > bestCloseScore)
+            bestCloseScore := resclose.score
+        if (resSearch.status == "success" && resSearch.score > 0.67) {
+            openedMenu := true
+            savedCloseX := resclose.x
+            savedCloseY := resclose.y
+            FileAppend("[" A_TickCount "] phase2 attempt " attempt ": SEARCHBAR FOUND score=" resSearch.score "`n", DebugLog)
+            LogToConsole("EquipTowers: SEARCHBAR FOUND (score " resSearch.score ") | attempt " attempt, true, false)
+            break
         }
-        FileAppend("[" A_TickCount "] attempt " attempt ": close_items.png check status=" resclose.status " score=" resclose.score "`n", DebugLog)
-        LogToConsole("EquipTowers: close_items.png check done (status=" resclose.status ", score=" resclose.score ")", true, false)
+        FileAppend("[" A_TickCount "] phase2 attempt " attempt ": searchbar=" resSearch.score " close=" resclose.score " - retry click`n", DebugLog)
+        LogToConsole("EquipTowers: attempt " attempt " -> searchbar score " resSearch.score ", close score " resclose.score ", retrying", true, false)
+        Sleep(1500)
     }
 
     FileAppend("=== EquipTowers end === openedMenu=" openedMenu " bestItemsScore=" bestItemsScore " bestCloseScore=" bestCloseScore "`n", DebugLog)
