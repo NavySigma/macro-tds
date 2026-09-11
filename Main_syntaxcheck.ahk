@@ -1,4 +1,5 @@
-﻿; Sigmacro (macro for TDS) by Darksen
+﻿ExitApp
+; Sigmacro (macro for TDS) by Darksen
 ;   Free for anyone to use
 ;   Modifications are welcome, however stealing credit is not.
 ;   You can add your name, but my original credit must remain.
