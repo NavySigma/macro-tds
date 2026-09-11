@@ -5722,9 +5722,9 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
                 continue
             }
 
-            ; The OCR click already landed on the map card's name - trust it and move on.
+            ; The image-search click already landed on the map card - trust it and move on.
             if (clickedOcr) {
-                LogToConsole(gamemap " clicked via OCR, proceeding to vote map.", true, false)
+                LogToConsole(gamemap " clicked via image search, proceeding to vote map.", true, false)
                 break
             }
 
@@ -5796,67 +5796,47 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
 }
 
 ClickOnMapResult(res, w, h) {
-    global gamemap, windowX, windowY, LegacyMode
+    global gamemap, windowX, windowY
     GetRobloxClientPos()
+    getRobloxPos(,,&w,&h)
 
-    langCode := "en-US"
-    for availableLang in StrSplit(OCR.GetAvailableLanguages(), "`n", "`r") {
-        if (availableLang != "" && SubStr(availableLang, 1, 2) = "en") {
-            langCode := availableLang
+    ; Find the map card with image search only (no OCR).
+    card := ""
+    for imagePath in ["Resources/Maps/" gamemap "_Selection.png", "Resources/Maps/" gamemap ".png"] {
+        rCard := AdvancedImageSearch(imagePath, Round(w * 0.1), 0, Round(w * 0.7), h, 0.5, 1.5)
+        if (rCard.status == "success" && rCard.score >= 0.65) {
+            card := rCard
             break
         }
     }
 
-    ; Search area: just below the search bar, bounded to keep OCR fast & under size limits.
-    ocrX := Max(0, res.x - ScaleX(150))
-    ocrY := Max(0, res.y + 40)
-    ocrW := Min(Round(w * 0.7), 900)
-    ocrH := Min(Round(h * 0.35), 400)
-
-    ; Layout below the search bar: filter row (All/Easy/Normal/...) then the 1:1 map cards.
-    ; Scan several rows & columns past the filter row, hover each card so its name appears,
-    ; and click the one whose name matches the map we want.
-    foundOcr := false
-    rowY := res.y + ScaleY(110)
-    scanEnd := res.y + ScaleY(340)
-    scanStep := ScaleY(35)
-    xOffsets := [0, -ScaleX(60), ScaleX(60), -ScaleX(120), ScaleX(120)]
-
-    while (rowY <= scanEnd && !foundOcr) {
-        for xOff in xOffsets {
-            candyX := res.x + xOff
-            MouseMove(candyX, rowY)
-            Sleep(200)
-            try {
-                oc := OCR.FromRect(ocrX, ocrY, ocrW, ocrH, {lang: langCode, scale: 2, grayscale: 1})
-                fnd := oc.FindString(gamemap, {CaseSense: false})
-                if (fnd.HasProp("x") && fnd.HasProp("y") && fnd.x > 0 && fnd.y > 0) {
-                    tX := fnd.x + fnd.w//2
-                    tY := fnd.y + fnd.h//2
-                    MouseMove(tX, tY)
-                    Sleep(120)
-                    Click
-                    LogToConsole("Map " gamemap " clicked via OCR at (" tX "," tY ")", true, false)
-                    foundOcr := true
-                    break
-                }
-            } catch {
-                ; name not visible at this card, keep scanning
-            }
-        }
-        rowY := rowY + scanStep
+    if (card != "") {
+        cardX := card.x
+        cardY := card.y
+    } else {
+        ; Fallback: first card position just below the search bar.
+        cardX := res.x - ScaleX(100)
+        cardY := res.y + ScaleY(160)
     }
+    MouseMove(cardX, cardY)
+    Sleep(150)
 
-    if (!foundOcr) {
-        ; Fallback: click at the expected first card position below the filter row.
-        fx := res.x - ScaleX(90)
-        fy := res.y + ScaleY(160)
-        MouseMove(fx, fy)
+    ; Spam-click for up to 2 seconds, or until the override menu closes
+    ; (search bar disappears = the screen actually changed).
+    screenChanged := false
+    spamStart := A_TickCount
+    while (A_TickCount - spamStart <= 2000) {
+        Click(cardX, cardY)
         Sleep(150)
-        Click
-        LogToConsole("Fallback click for " gamemap " at (" fx "," fy ")", true, false)
+        resCheck := AdvancedImageSearch("Resources/searchbar.png", Round(w * 0.1), 0, Round(w * 0.6), h, 0.5, 1.5)
+        if !(resCheck.status == "success" && resCheck.score >= 0.6) {
+            screenChanged := true
+            break
+        }
     }
-    return foundOcr
+
+    LogToConsole("Map " gamemap " clicked (spam-click at " cardX "," cardY ", screenChanged=" screenChanged ")", true, false)
+    return screenChanged
 }
 
 CheckTheMapF() {
