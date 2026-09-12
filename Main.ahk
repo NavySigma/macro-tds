@@ -6359,6 +6359,42 @@ SellTower(towerID) {
     return false
 }
 
+UpgradeMenuSig(XA, YA, WA, HA) {
+    global windowX, windowY
+    GetRobloxClientPos()
+    pBmp := Gdip_BitmapFromScreen((XA + windowX) "|" (YA + windowY) "|" WA "|" HA)
+    if (pBmp == "" || pBmp == -1 || pBmp == -2)
+        return -1
+
+    err := Gdip_LockBits(pBmp, 0, 0, WA, HA, &Stride, &Scan0, &BData, 1)
+
+    if (err) {
+        Gdip_DisposeImage(pBmp)
+        return -1
+    }
+
+    h := 2166136261
+    y := 0
+    while (y < HA) {
+        x := 0
+        row := y * Stride
+        while (x < WA) {
+            px := NumGet(Scan0, row + x * 4, "UInt")
+            r := (px >> 16) & 0xFF
+            g := (px >> 8) & 0xFF
+            b := px & 0xFF
+            h := (((h ^ r) * 16777619) ^ g) * 16777619
+            h := (h ^ b) * 16777619 & 0xFFFFFFFF
+            x += 2
+        }
+        y += 2
+    }
+
+    Gdip_UnlockBits(pBmp, &BData)
+    Gdip_DisposeImage(pBmp)
+    return h
+}
+
 UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLevel := 0) {
     global Towers, unfocusX, unfocusY, LastOpenedTowerID, needtocheckTowerUI, UpgradeDelay
     global PotatoMode, Recording, RecordedSteps, Commander, canUseAbility
@@ -6509,6 +6545,9 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
 
         if (isGreen && canBeUpgraded) {
             canUseAbility := false
+
+            upgSigBefore := UpgradeMenuSig(XA, YA, WA, HA)
+
             if (UseHForUpgrade) {
                 if (path != 0 && nextLevel > pathLevel && pathLevel != 0) {
                     if (path = 1) { 
@@ -6525,6 +6564,34 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
 
             Sleep(UpgradeDelay)
 
+            upgApplied := (upgSigBefore == -1)
+            if (!upgApplied) {
+                verifyStart := A_TickCount
+                Loop {
+                    upgSigAfter := UpgradeMenuSig(XA, YA, WA, HA)
+                    if (upgSigAfter != -1 && upgSigAfter != upgSigBefore) {
+                        upgApplied := true
+                        break
+                    }
+                    if (A_TickCount - verifyStart > 800)
+                        break
+                    Sleep(120)
+                }
+            }
+
+            if (!upgApplied) {
+                LogToConsole("Tower " towerID " upgrade did not register, retrying...")
+                attempts++
+                if (attempts > 30) {
+                    LogToConsole("Tower " towerID " upgrade not registering after 30 attempts, reloading...", true)
+                    SafeReload()
+                }
+                canUseAbility := true
+                needtocheckTowerUI := true
+                continue
+            }
+
+            attempts := 0
             Towers[towerID].level += 1
             upgradesDone++
             LogToConsole("Tower " towerID " upgraded to level " Towers[towerID].level " (" upgradesDone "/" totalUpgrades ")")
