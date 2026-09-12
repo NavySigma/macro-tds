@@ -194,6 +194,8 @@ global gamemap := "", difficulty := "", requiredTowers := ""
 global autoChain := "OFF", autoCaravan := "OFF", autoDropTheBeat := "OFF"
 global LastDropTime := 0
 global Commander := false, AutoSkip := "ON", AbilitySpam := "ON", AutoSkipMaxWave := 0, AutoSkipExceptWaves := "", CurrentWave := 0, AutoSkipBtnSeen := false
+global JustSkipped := false, ExceptWaveActive := false
+global LastWaveSyncTick := 0
 
 global SpecialMaps := ["Simplicity", "Cataclysm"]
 
@@ -2307,8 +2309,10 @@ StartRecording(ctrl, *) {
     AutoSkip := v.RecAutoSkip ? "ON" : "OFF"
     exceptionStr := StrReplace(Trim(v.RecSkipExcept), " ", "")
     AutoSkipExceptWaves := (exceptionStr = "") ? "" : "," exceptionStr ","
-    CurrentWave := 0
+    CurrentWave := 1
     AutoSkipBtnSeen := false
+    JustSkipped := false
+    ExceptWaveActive := false
     AbilitySpam := v.RecAbilitySpam ? "ON" : "OFF"
     MoveEnabled := v.RecMoveEnabled ? true : false
     MoveDirection := v.RecMoveDirection
@@ -4192,6 +4196,7 @@ LoadStrategyFile(file) {
     global Towers, RecordedSteps, gamemap, difficulty, requiredTowers, autoChain, autoCaravan
     global autoDropTheBeat, AutoSkip, AbilitySpam, MoveEnabled, MoveDirection, MoveDuration
     global modifiers, Commander, StrategyWidth, StrategyHeight, AutoSkipMaxWave, AutoSkipExceptWaves, CurrentWave, AutoSkipBtnSeen
+    global JustSkipped, ExceptWaveActive
 
     Towers := Map()
     RecordedSteps := []
@@ -4207,8 +4212,10 @@ LoadStrategyFile(file) {
     AutoSkipMaxWave := IsNumber(IniRead(file, "Settings", "autoSkipMaxWave", "0")) ? Integer(IniRead(file, "Settings", "autoSkipMaxWave", "0")) : 0
     exceptionStr := StrReplace(Trim(IniRead(file, "Settings", "autoSkipExceptWaves", "")), " ", "")
     AutoSkipExceptWaves := (exceptionStr = "") ? "" : "," exceptionStr ","
-    CurrentWave := 0
+    CurrentWave := 1
     AutoSkipBtnSeen := false
+    JustSkipped := false
+    ExceptWaveActive := false
     AbilitySpam := IniRead(file, "Settings", "abilitySpam", "ON")
     modifiers := IniRead(file, "Settings", "modifiers", "")
 
@@ -4307,8 +4314,10 @@ RunStrategy(stratFile := "", skipRestart := false) {
 
     LastOpenedTowerID := ""
 
-    CurrentWave := 0
+    CurrentWave := 1
     AutoSkipBtnSeen := false
+    JustSkipped := false
+    ExceptWaveActive := false
 
     LogToConsole("Starting strategy... Press F2 to STOP!!!")
     LogToConsole("Map = " gamemap)
@@ -6866,6 +6875,7 @@ UseAbilities(*) {
     global ChainKey, BeatKey, CaravanKey, CancelPlacementKey, TimeScaleMultiplier, AutoSkip, AbilitySpam, AutoSkipMaxWave, AutoSkipExceptWaves, CurrentWave, AutoSkipBtnSeen
     global autoChain, autoCaravan, autoDropTheBeat, Commander, unfocusX, unfocusY, canUseAbility
     global LastOpenedTowerID, Towers, TimescaleActive, needtocheckTowerUI, AutoSkipMaxWave, LastDropTime
+    global JustSkipped, ExceptWaveActive, LastWaveSyncTick
     static LastChainTime := 0, LastCaravanTime := 0
 
     if (!canUseAbility) {
@@ -6888,20 +6898,42 @@ UseAbilities(*) {
     if (AutoSkip = "ON") {
         res := AdvancedImageSearch("Resources/Skip.png", Round(A_ScreenWidth * 0.3), 0, Round(A_ScreenWidth * 0.7), Round(A_ScreenHeight * 0.35), 0.5, 1.5)
         skipBtnFound := (res.status = "success" && res.score >= 0.65)
+
+        if (skipBtnFound && A_TickCount - LastWaveSyncTick > 1500) {
+            LastWaveSyncTick := A_TickCount
+            readWave := ReadWaveNumber()
+            if (readWave > 0 && readWave <= 99 && readWave >= CurrentWave && readWave <= CurrentWave + 30) {
+                CurrentWave := readWave
+                AutoSkipBtnSeen := false
+                JustSkipped := false
+                ExceptWaveActive := false
+                LogToConsole("synced wave (" CurrentWave ")")
+            }
+        }
+
         if (skipBtnFound && !AutoSkipBtnSeen) {
-            CurrentWave++
+            JustSkipped := false
             AutoSkipBtnSeen := true
         }
-        if (!skipBtnFound)
+        if (!skipBtnFound && AutoSkipBtnSeen) {
+            if (JustSkipped) {
+                JustSkipped := false
+            } else if (ExceptWaveActive) {
+                CurrentWave++
+                ExceptWaveActive := false
+            }
             AutoSkipBtnSeen := false
+        }
 
         allowSkip := skipBtnFound
         if (allowSkip && AutoSkipExceptWaves != "" && InStr(AutoSkipExceptWaves, "," CurrentWave ",")) {
             allowSkip := false
+            ExceptWaveActive := true
             LogToConsole("not skipping wave (" CurrentWave ")")
         }
         if (allowSkip && AutoSkipMaxWave > 0 && CurrentWave >= AutoSkipMaxWave) {
             allowSkip := false
+            LogToConsole("skip disabled from wave (" CurrentWave ") onward")
         }
 
         if (allowSkip) {
@@ -6915,6 +6947,8 @@ UseAbilities(*) {
                 MouseMove(cx, cy)
                 Sleep(20)
                 LogToConsole("skipped wave (" CurrentWave ")")
+                CurrentWave++
+                JustSkipped := true
             }
         }
     }
@@ -8318,6 +8352,36 @@ ReadMessage(includeStr := "", includeRx := "", excludeStr := "", excludeRx := ""
     }
 
     return matchStr && matchRx
+}
+
+; reads the current wave number shown at the top center of the game screen
+; returns the wave number, or 0 if it cannot be read reliably
+ReadWaveNumber() {
+    global windowX, windowY
+    getRobloxPos(,,&w,&h)
+    GetRobloxClientPos()
+    x := Round(w * 0.40) + windowX
+    y := Round(h * 0.045) + windowY
+    cw := Round(w * 0.20)
+    ch := Round(h * 0.07)
+    if (cw <= 0 || ch <= 0)
+        return 0
+
+    langCode := "en-US"
+    for availableLang in StrSplit(OCR.GetAvailableLanguages(), "`n", "`r") {
+        if (availableLang != "" && SubStr(availableLang, 1, 2) = "en") {
+            langCode := availableLang
+            break
+        }
+    }
+
+    ocrResult := OCR.FromRect(x, y, cw, ch, {lang: langCode, scale: 3, grayscale: 1})
+    text := ocrResult.Text
+    if (RegExMatch(text, "i)\bwave[^\d]{0,4}(\d{1,2})\b", &m))
+        return Integer(m[1])
+    if (RegExMatch(text, "\b(\d{1,2})\b", &m))
+        return Integer(m[1])
+    return 0
 }
 
 waitForTowerUI(&resV2 := "", &resV1 := "", timeout := 0) {
