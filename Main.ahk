@@ -8367,9 +8367,9 @@ ReadWaveNumber() {
     global windowX, windowY
     getRobloxPos(,,&w,&h)
     GetRobloxClientPos()
-    x := Round(w * 0.28) + windowX
+    x := Round(w * 0.26) + windowX
     y := Round(h * 0.045) + windowY
-    cw := Round(w * 0.26)
+    cw := Round(w * 0.28)
     ch := Round(h * 0.08)
     if (cw <= 0 || ch <= 0)
         return 0
@@ -8384,9 +8384,14 @@ ReadWaveNumber() {
 
     ocrResult := OCR.FromRect(x, y, cw, ch, {lang: langCode, scale: 3, grayscale: 1})
     text := ocrResult.Text
-    if (RegExMatch(text, "i)\bwave[^\d]{0,4}(\d{1,2})\b", &m))
+    ; "wave N" or "wave 1 / 35" -> take the first number that follows the word
+    if (RegExMatch(text, "i)wave\D*?(\d{1,3})", &m))
         return Integer(m[1])
-    if (RegExMatch(text, "\b(\d{1,2})\b", &m))
+    ; "1 / 35" (current / total) -> take the current wave (number before the slash)
+    if (RegExMatch(text, "(\d{1,3})\s*/\s*(\d{1,3})", &m))
+        return Integer(m[1])
+    ; lone number fallback -> first number found
+    if (RegExMatch(text, "\b(\d{1,3})\b", &m))
         return Integer(m[1])
     return 0
 }
