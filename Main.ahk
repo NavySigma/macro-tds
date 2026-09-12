@@ -6543,15 +6543,20 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
         if (needtocheckTowerUI || !cachedPos) {
             openedSuccessfully := waitForTowerUI(&ResV2, &ResV1)
 
-            if (!openedSuccessfully && canBeUpgraded) {
+            if (!openedSuccessfully) {
                 attempts++
                 if (attempts > 30) {
                     LogToConsole("Tower " towerID " menu not found after 30 attempts, reloading...", true)
                     SafeReload()
                 }
-                variation := Random(-4, 4)
-                Click(targetX, targetY + ScaleY(variation))
-                Sleep(100)
+                ; force re-open the tower popup with a small jitter (never just idle here)
+                if (canBeUpgraded) {
+                    variation := Random(-5, 5)
+                    Click(targetX + ScaleX(Random(-6, 6)), targetY + ScaleY(variation))
+                    Sleep 150
+                } else {
+                    Sleep 100
+                }
                 continue
             } else {
                 attempts := 0
@@ -6899,15 +6904,17 @@ UseAbilities(*) {
         res := AdvancedImageSearch("Resources/Skip.png", Round(A_ScreenWidth * 0.3), 0, Round(A_ScreenWidth * 0.7), Round(A_ScreenHeight * 0.35), 0.5, 1.5)
         skipBtnFound := (res.status = "success" && res.score >= 0.65)
 
-        if (skipBtnFound && A_TickCount - LastWaveSyncTick > 1500) {
+        if (A_TickCount - LastWaveSyncTick > 2000) {
             LastWaveSyncTick := A_TickCount
             readWave := ReadWaveNumber()
             if (readWave > 0 && readWave <= 99 && readWave >= CurrentWave && readWave <= CurrentWave + 30) {
-                CurrentWave := readWave
-                AutoSkipBtnSeen := false
-                JustSkipped := false
-                ExceptWaveActive := false
-                LogToConsole("synced wave (" CurrentWave ")")
+                if (readWave != CurrentWave) {
+                    CurrentWave := readWave
+                    AutoSkipBtnSeen := false
+                    JustSkipped := false
+                    ExceptWaveActive := false
+                    LogToConsole("synced wave (" CurrentWave ")")
+                }
             }
         }
 
@@ -8360,10 +8367,10 @@ ReadWaveNumber() {
     global windowX, windowY
     getRobloxPos(,,&w,&h)
     GetRobloxClientPos()
-    x := Round(w * 0.40) + windowX
+    x := Round(w * 0.28) + windowX
     y := Round(h * 0.045) + windowY
-    cw := Round(w * 0.20)
-    ch := Round(h * 0.07)
+    cw := Round(w * 0.26)
+    ch := Round(h * 0.08)
     if (cw <= 0 || ch <= 0)
         return 0
 
