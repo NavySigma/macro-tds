@@ -6424,6 +6424,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
     LastOpenedTowerID := towerID
     upgradesDone := 0
     attempts := 0
+    upgFailStreak := 0
 
     upgTime := A_TickCount
 
@@ -6580,7 +6581,12 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
             }
 
             if (!upgApplied) {
-                LogToConsole("Tower " towerID " upgrade did not register, retrying...")
+                upgFailStreak++
+                if (upgFailStreak > 15) {
+                    LogToConsole("Tower " towerID " upgrade not registering, skipping pending (A TickCount=" A_TickCount ")", true)
+                    return upgradesDone > 0
+                }
+                LogToConsole("Tower " towerID " upgrade did not register, retrying (" upgFailStreak "/15)...")
                 attempts++
                 if (attempts > 30) {
                     LogToConsole("Tower " towerID " upgrade not registering after 30 attempts, reloading...", true)
@@ -6591,6 +6597,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
                 continue
             }
 
+            upgFailStreak := 0
             attempts := 0
             Towers[towerID].level += 1
             upgradesDone++
