@@ -192,6 +192,7 @@ global UpgradeDelay := IniRead(SettingsFile, "Options", "UpgradeDelay", 200)
 
 global gamemap := "", difficulty := "", requiredTowers := ""
 global autoChain := "OFF", autoCaravan := "OFF", autoDropTheBeat := "OFF"
+global LastDropTime := 0
 global Commander := false, AutoSkip := "ON", AbilitySpam := "ON", AutoSkipMaxWave := 0, AutoSkipExceptWaves := "", CurrentWave := 0, AutoSkipBtnSeen := false
 
 global SpecialMaps := ["Simplicity", "Cataclysm"]
@@ -3281,7 +3282,73 @@ CloneTower(towerId, x, y, wait := 0) {
         }
 
         if (ImageSearch(&fx,&fy,x1,y1,x2,y2, "*Trans000000 *50 " A_WorkingDir "/Resources/cannot_place_here.png") || ReadMessage(["cannot", "here", "hereg", "herd", "her", "here!", "cann", "cannd", "he", "h", "hed"],,["need", "more", "to"],"\$|\d")) {
-            LogToConsole("Failed to clone " towerId "! (cannot place here!) Retrying again in 5 seconds...")
+            LogToConsole("Failed to clone " towerId "! (cannot place here!) Trying Drop the Beat then spam clicking...")
+
+            UseDropTheBeat()
+
+            SendEvent("{" CancelPlacementKey "}")
+            Click(ScaleX(unfocusX), ScaleY(unfocusY))
+            Sleep 120
+
+            SendEvent("{" HologramKey "}")
+            Sleep 300
+
+            found := false
+            startTime := A_TickCount
+            while (!found && (A_TickCount - startTime < 4000)) {
+                loop 15 {
+                    variationY := A_Index - 8
+
+                    MouseMove(baseX, baseY + ScaleY(variationY))
+                    Sleep 180
+
+                    MouseGetPos(&mx, &my)
+                    cashX := mx + ScaleX(69)
+                    cashY := my - ScaleY(59)
+
+                    x1 := cashX - 30
+                    y1 := cashY - 8
+                    x2 := cashX + 15
+                    y2 := cashY + 8
+
+                    if (PixelSearch(&Fx, &Fy, x1, y1, x2, y2, 0x99BFD4, 18)) {
+                        found := true
+                        MouseClick
+                        break 2
+                    }
+                }
+                if (!found) {
+                    Sleep 100
+                }
+            }
+            if !found {
+                MouseClick(, baseX, baseY)
+            }
+
+            Sleep 350
+
+            placed := false
+            spamStart := A_TickCount
+            while (!placed && (A_TickCount - spamStart < 10000)) {
+                MouseMove(x, y)
+                Sleep 40
+                MouseClick()
+
+                Sleep 300
+
+                if (!(ImageSearch(&fx,&fy,x1,y1,x2,y2, "*Trans000000 *50 " A_WorkingDir "/Resources/cannot_place_here.png") || ReadMessage(["cannot", "here", "hereg", "herd", "her", "here!", "cann", "cannd", "he", "h", "hed"],,["need", "more", "to"],"\$|\d"))) {
+                    placed := true
+                }
+            }
+
+            SendEvent("{" CancelPlacementKey "}")
+
+            if (placed) {
+                LogToConsole("Successfully cloned tower " towerId ".")
+                break
+            }
+
+            LogToConsole("Failed to clone " towerId "! (still cannot place here) Retrying again in 5 seconds...")
             canUseAbility := true
             Sleep 4650
             canUseAbility := false
@@ -6743,11 +6810,63 @@ CheckPopups(*) {
     }
 }
 
+UseDropTheBeat() {
+    global BeatKey, LastDropTime, CancelPlacementKey, LastOpenedTowerID, Towers, unfocusX, unfocusY
+    global TimescaleActive, TimeScaleMultiplier, autoDropTheBeat, canBeUpgraded, canUseAbility, needtocheckTowerUI
+
+    if (autoDropTheBeat != "ON")
+        return false
+    if (!Towers.Has("DJ") || Towers["DJ"].level < 3)
+        return false
+
+    multiplier := 1
+    if (TimescaleActive)
+        multiplier := TimeScaleMultiplier
+    if (A_TickCount - LastDropTime <= 28000 / multiplier)
+        return false
+
+    canBeUpgraded := false
+
+    SendEvent("{" CancelPlacementKey "}")
+    if (LastOpenedTowerID != "DJ" && LastOpenedTowerID != "") {
+        Click(ScaleX(unfocusX), ScaleY(unfocusY))
+        Sleep(100)
+    }
+
+    Loop {
+        LastDropTime := A_TickCount
+        SendEvent("{" BeatKey "}")
+
+        Sleep 350
+        getRobloxPos(,,&w,&h)
+        x1 := Round(w * 0.2)
+        y1 := Round(h * 0.18)
+        x2 := Round(w * 0.7)
+        y2 := Round(h * 0.3)
+        if (ImageSearch(&fx,&fy,x1,y1,x2,y2, "*Trans000000 *50 " A_WorkingDir "/Resources/stunned.png") || ReadMessage(["error", "that", "cannot", "cann", "activated", "while", "stunned"],,["need", "more", "to"],"\$|\d")) {
+            LogToConsole("Failed to use Drop the Beat! The tower is stunned! Retrying...")
+            Sleep 4400
+        } else {
+            LogToConsole("Successfully used Drop the Beat")
+            break
+        }
+    }
+
+    if (LastOpenedTowerID != "" && LastOpenedTowerID != "DJ") {
+        Click(Towers[LastOpenedTowerID].x, Towers[LastOpenedTowerID].y)
+        Sleep 250
+    }
+    canBeUpgraded := true
+    canUseAbility := true
+    needtocheckTowerUI := true
+    return true
+}
+
 UseAbilities(*) {
     global ChainKey, BeatKey, CaravanKey, CancelPlacementKey, TimeScaleMultiplier, AutoSkip, AbilitySpam, AutoSkipMaxWave, AutoSkipExceptWaves, CurrentWave, AutoSkipBtnSeen
     global autoChain, autoCaravan, autoDropTheBeat, Commander, unfocusX, unfocusY, canUseAbility
-    global LastOpenedTowerID, Towers, TimescaleActive, needtocheckTowerUI, AutoSkipMaxWave
-    static LastChainTime := 0, LastDropTime := 0, LastCaravanTime := 0
+    global LastOpenedTowerID, Towers, TimescaleActive, needtocheckTowerUI, AutoSkipMaxWave, LastDropTime
+    static LastChainTime := 0, LastCaravanTime := 0
 
     if (!canUseAbility) {
         return
@@ -6854,41 +6973,7 @@ UseAbilities(*) {
     }
 
     if (autoDropTheBeat = "ON" && Towers.Has("DJ") && Towers["DJ"].level >= 3 && (A_TickCount - LastDropTime > 28000 / multiplier)) {
-
-        canBeUpgraded := false
-
-        SendEvent("{" CancelPlacementKey "}")
-        if (LastOpenedTowerID != "DJ" && LastOpenedTowerID != "") {
-            Click(ScaleX(unfocusX), ScaleY(unfocusY))
-            Sleep(100)
-        }
-
-        Loop {
-            LastDropTime := A_TickCount
-            SendEvent("{" BeatKey "}")
-
-            Sleep 350
-            getRobloxPos(,,&w,&h)
-            x1 := Round(w * 0.2)
-            y1 := Round(h * 0.18)
-            x2 := Round(w * 0.7)
-            y2 := Round(h * 0.3)
-            if (ImageSearch(&fx,&fy,x1,y1,x2,y2, "*Trans000000 *50 " A_WorkingDir "/Resources/stunned.png") || ReadMessage(["error", "that", "cannot", "cann", "activated", "while", "stunned"],,["need", "more", "to"],"\$|\d")) {
-                LogToConsole("Failed to use Drop the Beat! The tower is stunned! Retrying...")
-                Sleep 4400
-            } else {    
-                LogToConsole("Successfully used Drop the Beat")
-                break
-            }
-        }
-
-        if (LastOpenedTowerID != "" && LastOpenedTowerID != "DJ") {
-            Click(Towers[LastOpenedTowerID].x, Towers[LastOpenedTowerID].y)
-            Sleep 250
-        }
-        canBeUpgraded := true
-        canUseAbility := true
-        needtocheckTowerUI := true
+        UseDropTheBeat()
     }
 }
 
