@@ -192,7 +192,7 @@ global UpgradeDelay := IniRead(SettingsFile, "Options", "UpgradeDelay", 200)
 
 global gamemap := "", difficulty := "", requiredTowers := ""
 global autoChain := "OFF", autoCaravan := "OFF", autoDropTheBeat := "OFF"
-global Commander := false, AutoSkip := "ON", AbilitySpam := "ON"
+global Commander := false, AutoSkip := "ON", AbilitySpam := "ON", AutoSkipMaxWave := 0, AutoSkipExceptWaves := "", CurrentWave := 0, AutoSkipBtnSeen := false
 
 global SpecialMaps := ["Simplicity", "Cataclysm"]
 
@@ -1118,6 +1118,11 @@ There you can create your own strategy and save it into a file. Watch the tutori
 )")
 RecAutoSkipCtrl.OnEvent("Click", RecordToggleAutoskip)
 
+MainGui.SetFont("s9 w400 cAAAAAA")
+global RecSkipLbl := MainGui.Add("Text", "x360 y335 h20 Hidden", "Don't skip waves (comma):")
+MainGui.SetFont("s9 w400 c000000")
+global RecSkipCtrl := MainGui.Add("Edit", "x500 y333 w90 h22 +Border Hidden vRecSkipExcept", AutoSkipExceptWaves)
+
 global RecMoveCtrl := MainGui.Add("Checkbox", "x30 y452 w60 h20 Hidden vRecMoveEnabled Checked" (MoveEnabled?1:0), "Move")
 MainGui.SetFont("s9 w400 cAAAAAA")
 global DIRECTIONTEXTCtrl := MainGui.Add("Text", "x100 y452 w45 Hidden", "Direction")
@@ -1819,7 +1824,7 @@ ShowTabContent(tab) {
         for ctrl in [Tab2_Title, Tab2_Line1, Tab2_Lbl1, RecMapsD, Tab2_Lbl2, RecDiffCtrl,
                      Tab2_Lbl3, RecModifiersCtrl, Tab2_Info2, Tab2_Lbl4, RecTowersCtrl, Tab2_Info1,
                      Tab2_Line2, Tab2_Line3, RecAutoChainCtrl, RecAutoCaravanCtrl, RecAutoDropCtrl,
-                     RecAutoSkipCtrl, RecAbilitySpamCtrl, Tab2_Info, RecMoveCtrl, DIRECTIONTEXTCtrl, RecMoveDirCtrl,
+                     RecAutoSkipCtrl, RecSkipLbl, RecSkipCtrl, RecAbilitySpamCtrl, Tab2_Info, RecMoveCtrl, DIRECTIONTEXTCtrl, RecMoveDirCtrl,
                      Tab2_Txt4, RecMoveDurCtrl, Tab2_Btn1, Tab2_Btn2]
             ctrl.Visible := true
     } else if (tab = "Tab3") {
@@ -2238,7 +2243,7 @@ StopStrategy(*) {
 
 StartRecording(ctrl, *) {
     global Recording, gamemap, difficulty, requiredTowers, modifiers, autoChain, autoCaravan
-    global autoDropTheBeat, AutoSkip, AbilitySpam, MoveEnabled, MoveDirection, MoveDuration
+    global autoDropTheBeat, AutoSkip, AbilitySpam, MoveEnabled, MoveDirection, MoveDuration, AutoSkipMaxWave, AutoSkipExceptWaves, CurrentWave, AutoSkipBtnSeen
     global Commander, RecordedSteps, Towers, MacroRecording, GuiTitleCtrl
     global Tab2_Btn1, Tab2_Btn2, HoverEffect
 
@@ -2299,6 +2304,10 @@ StartRecording(ctrl, *) {
     autoCaravan := v.RecAutoCaravan ? "ON" : "OFF"
     autoDropTheBeat := v.RecAutoDropTheBeat ? "ON" : "OFF"
     AutoSkip := v.RecAutoSkip ? "ON" : "OFF"
+    exceptionStr := StrReplace(Trim(v.RecSkipExcept), " ", "")
+    AutoSkipExceptWaves := (exceptionStr = "") ? "" : "," exceptionStr ","
+    CurrentWave := 0
+    AutoSkipBtnSeen := false
     AbilitySpam := v.RecAbilitySpam ? "ON" : "OFF"
     MoveEnabled := v.RecMoveEnabled ? true : false
     MoveDirection := v.RecMoveDirection
@@ -2318,7 +2327,7 @@ StartRecording(ctrl, *) {
 StopRecord(ctrl, *) {
     global Recording, MacroRecording, InputHookObj, MacroSteps, RecordedSteps
     global gamemap, difficulty, requiredTowers, modifiers
-    global autoChain, autoCaravan, autoDropTheBeat, AutoSkip, AbilitySpam, MoveEnabled, MoveDirection, MoveDuration
+    global autoChain, autoCaravan, autoDropTheBeat, AutoSkip, AbilitySpam, MoveEnabled, MoveDirection, MoveDuration, AutoSkipMaxWave, AutoSkipExceptWaves
     global GuiTitleCtrl, Strategy1Ctrl, RecordingsDir
     global Tab2_Btn1, Tab2_Btn2, HoverEffect
 
@@ -2384,7 +2393,7 @@ StopRecord(ctrl, *) {
         FileAppend("[Settings]`nmap=" gamemap "`ndifficulty=" difficulty "`nrequiredTowers=" requiredTowers
             . "`nmodifiers=" Join(modifiers)
             . "`nautoChain=" autoChain "`nautoCaravan=" autoCaravan "`nautoDropTheBeat=" autoDropTheBeat
-            . "`nautoSkip=" AutoSkip "`nabilitySpam=" AbilitySpam "`nmoveEnabled=" MoveEnabled "`nmoveDirection=" MoveDirection
+            . "`nautoSkip=" AutoSkip "`nautoSkipMaxWave=" AutoSkipMaxWave "`nautoSkipExceptWaves=" AutoSkipExceptWaves "`nabilitySpam=" AbilitySpam "`nmoveEnabled=" MoveEnabled "`nmoveDirection=" MoveDirection
             . "`nmoveDuration=" MoveDuration "`n`n[DO NOT EDIT]`nwidth=" currentWidth "`nheight=" currentHeight "`n`n[Steps]`n", filePath)
         for i, step in RecordedSteps
             FileAppend(step "`n", filePath)
@@ -4115,7 +4124,7 @@ HelpCheckTheMap(*) {
 LoadStrategyFile(file) {
     global Towers, RecordedSteps, gamemap, difficulty, requiredTowers, autoChain, autoCaravan
     global autoDropTheBeat, AutoSkip, AbilitySpam, MoveEnabled, MoveDirection, MoveDuration
-    global modifiers, Commander, StrategyWidth, StrategyHeight
+    global modifiers, Commander, StrategyWidth, StrategyHeight, AutoSkipMaxWave, AutoSkipExceptWaves, CurrentWave, AutoSkipBtnSeen
 
     Towers := Map()
     RecordedSteps := []
@@ -4128,6 +4137,11 @@ LoadStrategyFile(file) {
     autoCaravan := IniRead(file, "Settings", "autoCaravan", "OFF")
     autoDropTheBeat := IniRead(file, "Settings", "autoDropTheBeat", "OFF")
     AutoSkip := IniRead(file, "Settings", "autoSkip", "ON")
+    AutoSkipMaxWave := IsNumber(IniRead(file, "Settings", "autoSkipMaxWave", "0")) ? Integer(IniRead(file, "Settings", "autoSkipMaxWave", "0")) : 0
+    exceptionStr := StrReplace(Trim(IniRead(file, "Settings", "autoSkipExceptWaves", "")), " ", "")
+    AutoSkipExceptWaves := (exceptionStr = "") ? "" : "," exceptionStr ","
+    CurrentWave := 0
+    AutoSkipBtnSeen := false
     AbilitySpam := IniRead(file, "Settings", "abilitySpam", "ON")
     modifiers := IniRead(file, "Settings", "modifiers", "")
 
@@ -4188,7 +4202,7 @@ RunStrategy(stratFile := "", skipRestart := false) {
     global unfocusX, unfocusY, UseTimeScale, TimeScaleMultiplier, TimeScaleMode
     global SettingsFile, requiredTowers, modifiers, LastOpenedTowerID
     global LastSkipCheck, SKIP_CHECK_INTERVAL, AutorunStartTime, StateFile
-    global WebhookEnabled, CurrentStratStartTime, CurrentRunCount, gamemap, AutoEquip
+    global WebhookEnabled, CurrentStratStartTime, CurrentRunCount, gamemap, AutoEquip, CurrentWave, AutoSkipBtnSeen
 
     if (RunningStrategy != true)
         return
@@ -4225,6 +4239,9 @@ RunStrategy(stratFile := "", skipRestart := false) {
     startWatchdog()
 
     LastOpenedTowerID := ""
+
+    CurrentWave := 0
+    AutoSkipBtnSeen := false
 
     LogToConsole("Starting strategy... Press F2 to STOP!!!")
     LogToConsole("Map = " gamemap)
@@ -6727,9 +6744,9 @@ CheckPopups(*) {
 }
 
 UseAbilities(*) {
-    global ChainKey, BeatKey, CaravanKey, CancelPlacementKey, TimeScaleMultiplier, AutoSkip, AbilitySpam
+    global ChainKey, BeatKey, CaravanKey, CancelPlacementKey, TimeScaleMultiplier, AutoSkip, AbilitySpam, AutoSkipMaxWave, AutoSkipExceptWaves, CurrentWave, AutoSkipBtnSeen
     global autoChain, autoCaravan, autoDropTheBeat, Commander, unfocusX, unfocusY, canUseAbility
-    global LastOpenedTowerID, Towers, TimescaleActive, needtocheckTowerUI
+    global LastOpenedTowerID, Towers, TimescaleActive, needtocheckTowerUI, AutoSkipMaxWave
     static LastChainTime := 0, LastDropTime := 0, LastCaravanTime := 0
 
     if (!canUseAbility) {
@@ -6751,7 +6768,24 @@ UseAbilities(*) {
 
     if (AutoSkip = "ON") {
         res := AdvancedImageSearch("Resources/Skip.png", Round(A_ScreenWidth * 0.3), 0, Round(A_ScreenWidth * 0.7), Round(A_ScreenHeight * 0.35), 0.5, 1.5)
-        if (res.status = "success" && res.score >= 0.65) {
+        skipBtnFound := (res.status = "success" && res.score >= 0.65)
+        if (skipBtnFound && !AutoSkipBtnSeen) {
+            CurrentWave++
+            AutoSkipBtnSeen := true
+        }
+        if (!skipBtnFound)
+            AutoSkipBtnSeen := false
+
+        allowSkip := skipBtnFound
+        if (allowSkip && AutoSkipExceptWaves != "" && InStr(AutoSkipExceptWaves, "," CurrentWave ",")) {
+            allowSkip := false
+            LogToConsole("not skipping wave (" CurrentWave ")")
+        }
+        if (allowSkip && AutoSkipMaxWave > 0 && CurrentWave >= AutoSkipMaxWave) {
+            allowSkip := false
+        }
+
+        if (allowSkip) {
             Sleep(200)
             res := AdvancedImageSearch("Resources/Skip.png", Round(A_ScreenWidth * 0.3), 0, Round(A_ScreenWidth * 0.7), Round(A_ScreenHeight * 0.35), 0.5, 1.5)
             if (res.status = "success" && res.score >= 0.65) {
@@ -6761,7 +6795,7 @@ UseAbilities(*) {
                 Sleep(30)
                 MouseMove(cx, cy)
                 Sleep(20)
-                LogToConsole("skipped wave")
+                LogToConsole("skipped wave (" CurrentWave ")")
             }
         }
     }
