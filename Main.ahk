@@ -8370,9 +8370,9 @@ ReadWaveNumber() {
     global windowX, windowY
     getRobloxPos(,,&w,&h)
     GetRobloxClientPos()
-    x := Round(w * 0.26) + windowX
+    x := Round(w * 0.22) + windowX
     y := Round(h * 0.045) + windowY
-    cw := Round(w * 0.28)
+    cw := Round(w * 0.34)
     ch := Round(h * 0.08)
     if (cw <= 0 || ch <= 0)
         return 0
@@ -8386,16 +8386,36 @@ ReadWaveNumber() {
     }
 
     ocrResult := OCR.FromRect(x, y, cw, ch, {lang: langCode, scale: 3, grayscale: 1})
-    text := ocrResult.Text
-    ; "wave N" or "wave 1 / 35" -> take the first number that follows the word
-    if (RegExMatch(text, "i)wave\D*?(\d{1,3})", &m))
-        return Integer(m[1])
-    ; "1 / 35" (current / total) -> take the current wave (number before the slash)
-    if (RegExMatch(text, "(\d{1,3})\s*/\s*(\d{1,3})", &m))
-        return Integer(m[1])
-    ; lone number fallback -> first number found
-    if (RegExMatch(text, "\b(\d{1,3})\b", &m))
-        return Integer(m[1])
+
+    ; locate the "/" separator; the current wave is the number immediately left of it
+    slashIdx := -1
+    for i, word in ocrResult.Words {
+        if (word.Text = "/") {
+            slashIdx := i
+            break
+        }
+    }
+
+    if (slashIdx != -1) {
+        ; slash is the first captured word -> the left number is missing from the crop
+        if (slashIdx <= 1)
+            return 0
+        ; take the rightmost digit word BEFORE the slash (this is the current wave)
+        idx := slashIdx - 1
+        while (idx >= 1) {
+            if RegExMatch(ocrResult.Words[idx].Text, "(\d{1,3})", &num)
+                return Integer(num[1])
+            idx--
+        }
+        ; no digit found before slash – left number is missing from the crop
+        return 0
+    }
+
+    ; no slash at all (rare: only one number on screen) – accept it as the current wave
+    for word in ocrResult.Words {
+        if RegExMatch(word.Text, "(\d{1,3})", &num)
+            return Integer(num[1])
+    }
     return 0
 }
 
