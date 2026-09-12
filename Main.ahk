@@ -3199,24 +3199,24 @@ CloneTower(towerId, x, y, wait := 0) {
         found := false
         startTime := A_TickCount
 
-        while (!found && (A_TickCount - startTime < 6000)) {
+        while (!found && (A_TickCount - startTime < 4000)) {
             loop 15 {
                 variationY := A_Index - 8 
 
-                MouseMove(baseX, baseY + variationY)
-                Sleep 270 
+                MouseMove(baseX, baseY + ScaleY(variationY))
+                Sleep 180 
 
                 MouseGetPos(&mx, &my)
                 
-                cashX := mx + 69 
-                cashY := my - 59
-                
-                x1 := cashX - 20
-                y1 := cashY - 5
-                x2 := cashX + 10
-                y2 := cashY + 5
+                cashX := mx + ScaleX(69) 
+                cashY := my - ScaleY(59)
 
-                if PixelSearch(&Fx, &Fy, x1, y1, x2, y2, 0x99BFD4, 6) {
+                x1 := cashX - 30
+                y1 := cashY - 8
+                x2 := cashX + 15
+                y2 := cashY + 8
+
+                if PixelSearch(&Fx, &Fy, x1, y1, x2, y2, 0x99BFD4, 18) {
                     found := true
                     MouseClick
                     break 2
@@ -4316,6 +4316,10 @@ PlayStrategy() {
                 nextStep := RecordedSteps[lookAhead]
                 if RegExMatch(nextStep, "i)UpgradeTower\s*\(\s*" currentID "\s*(?:,\s*(?:false|true)\s*)?(?:,\s*(\d+)\s*)?(?:,\s*(\d+)\s*)?(?:,\s*(\d+)\s*)?\s*\)", &mN) {
                     countUpgrades += (mN[1] != "") ? Integer(mN[1]) : 1
+                    if (mN[2] != "") 
+                        currentPath := Integer(mN[2])
+                    if (mN[3] != "") 
+                        currentpathLevel := Integer(mN[3])
                     lookAhead++
                 } else {
                     break
@@ -6482,6 +6486,27 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
         } catch Error {
             isGreen := false
         }
+
+        if (!isGreen) {
+            ; Tower is already maxed out: stop counting phantom upgrades.
+            if (doResV2) {
+                fullX := resV2.x - ScaleX(100)
+                fullY := resV2.y - ScaleY(260)
+                fullW := ScaleX(300)
+                fullH := ScaleY(110)
+            } else {
+                fullX := resV1.x - ScaleX(344)
+                fullY := resV1.y + ScaleY(343)
+                fullW := ScaleX(300)
+                fullH := ScaleY(110)
+            }
+            fullChk := AdvancedImageSearch("Resources\fully_upgraded.png", fullX, fullY, fullW, fullH)
+            if (fullChk.status == "success" && fullChk.score >= 0.69) {
+                LogToConsole("Tower " towerID " is fully upgraded, skipping " (totalUpgrades - upgradesDone) " pending upgrade(s)")
+                return upgradesDone > 0
+            }
+        }
+
         if (isGreen && canBeUpgraded) {
             canUseAbility := false
             if (UseHForUpgrade) {
