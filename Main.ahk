@@ -6541,21 +6541,21 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
         }
 
         if (needtocheckTowerUI || !cachedPos) {
-            openedSuccessfully := waitForTowerUI(&ResV2, &ResV1)
+            if (canBeUpgraded && attempts > 0) {
+                ; the tower may have dodged (moved while shooting) so the last click missed.
+                ; Re-click it BEFORE scanning, walking a small ring around the recorded spot.
+                openCandidates := [[0, 0], [0, 12], [0, -12], [12, 0], [-12, 0], [16, 16], [-16, -16], [0, 22], [0, -22]]
+                cand := openCandidates[Mod(attempts - 1, openCandidates.Length) + 1]
+                Click(targetX + cand[1], targetY + cand[2])
+                Sleep 120
+            }
+            openedSuccessfully := waitForTowerUI(&ResV2, &ResV1, 700)
 
             if (!openedSuccessfully) {
                 attempts++
                 if (attempts > 30) {
                     LogToConsole("Tower " towerID " menu not found after 30 attempts, reloading...", true)
                     SafeReload()
-                }
-                ; force re-open the tower popup with a small jitter (never just idle here)
-                if (canBeUpgraded) {
-                    variation := Random(-5, 5)
-                    Click(targetX + ScaleX(Random(-6, 6)), targetY + ScaleY(variation))
-                    Sleep 150
-                } else {
-                    Sleep 100
                 }
                 continue
             } else {
@@ -6640,6 +6640,9 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
                 LogToConsole("Tower " towerID " is fully upgraded, skipping " (totalUpgrades - upgradesDone) " pending upgrade(s)")
                 return upgradesDone > 0
             }
+            ; the popup is not actually open -> reopen the tower next loop instead of
+            ; reusing stale cached positions and silently waiting forever
+            needtocheckTowerUI := true
         }
 
         if (isGreen && canBeUpgraded) {
