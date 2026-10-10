@@ -75,7 +75,7 @@ if !DirExist(RecordingsDir)
     DirCreate(RecordingsDir)
 
 ;INI READS
-global VipLink := IniRead(SettingsFile, "Options", "VipLink", "") 
+global VipLink := IniRead(SettingsFile, "Options", "VipLink", "")
 global UseVipServer := IniRead(SettingsFile, "Options", "UseVipServer", "0")
 global AlwaysOnTop := IniRead(SettingsFile, "Options", "AlwaysOnTop", 0)
 
@@ -155,10 +155,10 @@ global StrategyWidth := 1920
 global StrategyHeight := 1090
 
 global Slots := [
-    ScaleX(800) ", " ScaleY(960), 
-    ScaleX(880) ", " ScaleY(960), 
-    ScaleX(960) ", " ScaleY(960), 
-    ScaleX(1040) ", " ScaleY(960), 
+    ScaleX(800) ", " ScaleY(960),
+    ScaleX(880) ", " ScaleY(960),
+    ScaleX(960) ", " ScaleY(960),
+    ScaleX(1040) ", " ScaleY(960),
     ScaleX(1120) ", " ScaleY(960)
 ]
 
@@ -232,9 +232,9 @@ global AutorunStartTime := 0
 global watchdogPID := ""
 
 global SC_L:="sc026"
-global SC_R:="sc013" 
+global SC_R:="sc013"
 global SC_Esc:="sc001"
-global SC_Enter:="sc01c" 
+global SC_Enter:="sc01c"
 SC_E:="sc012" ; e
 
 if (DebugConsole = "1")
@@ -355,7 +355,7 @@ DetectTowerForUpgrading(*) {
 
     MouseGetPos(&mx, &my, &clickWindow)
     robloxHwnd := GetRobloxHWND()
-    
+
     if (clickWindow != robloxHwnd)
         return
 
@@ -365,7 +365,7 @@ DetectTowerForUpgrading(*) {
         iy1 := t.y - 16
         ix2 := ix1 + 32
         iy2 := iy1 + 32
-        
+
         if (mx >= ix1 && mx <= ix2 && my >= iy1 && my <= iy2) {
             currentTowerID := id
             break
@@ -375,9 +375,9 @@ DetectTowerForUpgrading(*) {
     if (currentTowerID != "") {
         ActiveRTowerID := currentTowerID
         isUpgradeAuthorized := false
-        
+
         openedSuccessfully := waitForTowerUI(&resv2, &resv1)
-        
+
         if (!openedSuccessfully) {
             ActiveRTowerID := ""
         } else {
@@ -388,7 +388,7 @@ DetectTowerForUpgrading(*) {
     } else {
         if (ActiveRTowerID != "") {
             openedSuccessfully := waitForTowerUI(&resv2, &resv1, 120)
-            
+
             if (!openedSuccessfully) {
                 ActiveRTowerID := ""
             }
@@ -398,12 +398,12 @@ DetectTowerForUpgrading(*) {
 
 DetectUpgrade(*) {
     global Recording, ActiveRTowerID, Towers, RecordedSteps, Commander, isUpgradeAuthorized, activeUpgradeRegions, CachedResV2, CachedResV1
-    
+
     if (!Recording || !IsSet(ActiveRTowerID) || ActiveRTowerID == "")
         return
 
     towerID := ActiveRTowerID
-    
+
     if (!Towers.Has(towerID)) {
         ActiveRTowerID := ""
         return
@@ -411,7 +411,7 @@ DetectUpgrade(*) {
 
     MouseGetPos(&mx, &my, &clickWindow)
     robloxHwnd := GetRobloxHWND()
-    
+
     if (clickWindow != robloxHwnd)
         return
 
@@ -453,7 +453,7 @@ DetectUpgrade(*) {
     region := [upgAX, upgAY, upgAW, upgAH]
 
     if (path != 0 && nextLevel > pathLevel && pathLevel != 0) {
-        if (path = 2 && IsObject(resv1)) { 
+        if (path = 2 && IsObject(resv1)) {
             region := [resv1.x - ScaleX(344), resv1.y + ScaleY(488), ScaleX(300), ScaleY(110)]
         }
     }
@@ -472,13 +472,13 @@ DetectUpgrade(*) {
             Towers[towerID].level += 1
             LogToConsole("Upgraded tower " towerID " to level " Towers[towerID].level ".")
             UpdateTowerIndicator(towerID)
-            
+
             if (Towers[towerID].path != 0 && Towers[towerID].path != "") {
                 RecordedSteps.Push("UpgradeTower(" towerID ", false, 1, " Towers[towerID].path ", " Towers[towerID].pathLevel ")")
             } else {
                 RecordedSteps.Push("UpgradeTower(" towerID ")")
             }
-            
+
             if (Towers[towerID].level >= 2 && RegExMatch(towerID, "i)^Commander\d*$") && !Commander) {
                 Commander := true
                 if (!HasStep("Commander := true"))
@@ -505,17 +505,17 @@ sX(baseX, Width := 1920) {
         return
 
     getRobloxPos(&pX, &pY, &currentWidth, &currentHeight, hwnd)
-    if (Width == 0) 
+    if (Width == 0)
         return baseX
 
     if (Width == 1920 && StrategyHeight == 1090) {
         WinGetClientPos(&cX, , , , "ahk_id " hwnd)
         WinGetPos(&wX, , , , "ahk_id " hwnd)
         currentBorderX := cX - wX
-        baseX := baseX - currentBorderX 
-        Width := 1920 
+        baseX := baseX - currentBorderX
+        Width := 1920
     }
-    
+
     return Round(baseX * (currentWidth / Width))
 }
 
@@ -524,17 +524,17 @@ sY(baseY, Height := 1090) {
     if !hwnd
         return
     getRobloxPos(&pX, &pY, &currentWidth, &currentHeight, hwnd)
-    if (Height == 0) 
+    if (Height == 0)
         return baseY
-    
+
     if (Height == 1090) {
         WinGetClientPos(, &cY, , , "ahk_id " hwnd)
         WinGetPos(, &wY, , , "ahk_id " hwnd)
         currentBorderY := cY - wY
-        baseY := baseY - currentBorderY 
-        Height := 1009 
+        baseY := baseY - currentBorderY
+        Height := 1009
     }
-    
+
     return Round(baseY * (currentHeight / Height))
 }
 
@@ -653,19 +653,19 @@ tabNames := ["Main", "Record", "(Beta) Party", "Discord", "Settings", "Tools", "
 Loop tabNames.Length {
     i   := A_Index
     xTab := 20 + (i-1) * 90
-    
+
     hBg := MainGui.Add("Progress", "x" xTab " y43 w80 h34 Hidden Background222222 Disabled")
     HoverTab.Push(hBg)
-    SystemHwnds[hBg.Hwnd] := true 
-    
+    SystemHwnds[hBg.Hwnd] := true
+
     t := MainGui.Add("Text", "x" xTab " y52 w80 h22 Center BackgroundTrans", tabNames[i])
     t.OnEvent("Click", SelectTab)
     TabCtrl.Push(t)
-    SystemHwnds[t.Hwnd] := true 
+    SystemHwnds[t.Hwnd] := true
 }
 
 global TabLine := MainGui.Add("Progress", "x20 y75 w80 h2 BackgroundFFFFFF", 0)
-SystemHwnds[TabLine.Hwnd] := true 
+SystemHwnds[TabLine.Hwnd] := true
 
 sysLine2 := MainGui.Add("Progress", "x0 y77 w700 h1 Background222222", 0)
 SystemHwnds[sysLine2.Hwnd] := true
@@ -687,8 +687,8 @@ Tab1_Btn1.OnEvent("Click", SelectStrat1)
 global Tab1_Btn2 := MainGui.Add("Text", "x590 y126 w70 h22 +Border 0x200 Center", "Clear")
 Tab1_Btn2.OnEvent("Click", ClearStrat1)
 
-HoverEffect.Push(Tab1_Btn1) 
-HoverEffect.Push(Tab1_Btn2) 
+HoverEffect.Push(Tab1_Btn1)
+HoverEffect.Push(Tab1_Btn2)
 
 MainGui.SetFont("s9 w400 cAAAAAA")
 global Tab1_Lbl2 := MainGui.Add("Text", "x30 y160 w100 h20", "Strategy 2:")
@@ -701,8 +701,8 @@ Tab1_Btn3.OnEvent("Click", SelectStrat2)
 global Tab1_Btn4 := MainGui.Add("Text", "x590 y156 w70 h22 +Border 0x200 Center", "Clear")
 Tab1_Btn4.OnEvent("Click", ClearStrat2)
 
-HoverEffect.Push(Tab1_Btn3) 
-HoverEffect.Push(Tab1_Btn4) 
+HoverEffect.Push(Tab1_Btn3)
+HoverEffect.Push(Tab1_Btn4)
 
 MainGui.SetFont("s9 w400 cFFFFFF")
 global RotateStrategiesCtrl := MainGui.Add("Checkbox", "x30 y190 vRotateStrategies 0x200 Checked" RotateStrategies, "Strategy Rotation")
@@ -711,7 +711,7 @@ RotateStrategiesCtrl.OnEvent("Click", EnableStratRotation)
 MainGui.SetFont("s9 w400 cAAAAAA")
 global SwapAfterLbl := MainGui.Add("Text", "x148 y188 w70 h20 0x200 BackgroundTrans", "Swap after:")
 
-MainGui.SetFont("s9 w400 c000000") 
+MainGui.SetFont("s9 w400 c000000")
 global SwapAmountCtrl := MainGui.Add("Edit", "x217 y186 w40 h22 +Border Number Center vSwapAmount", SwapAmount)
 
 SwapAmountCtrl.OnEvent("Change", (*) => (
@@ -747,29 +747,29 @@ lastUpdate := IniRead(StateFile, "Cache", "LastUpdateTime", "0")
 if (lastUpdate != "0") {
     timeDiff := DateDiff(A_Now, lastUpdate, "Hours")
     if (timeDiff < 6) {
-        needUpdate := false 
+        needUpdate := false
     }
 }
 
 if (needUpdate) {
     try {
         apiURL := "https://api.github.com/repos/DarksenDev/tds-macro/contents/Strategies"
-        
+
         whr := ComObject("WinHttp.WinHttpRequest.5.1")
         whr.Open("GET", apiURL, true)
         whr.SetRequestHeader("User-Agent", "Strategy-Updater")
         whr.Send()
-        
+
         while (!whr.WaitForResponse(1)) {
             Sleep(50)
         }
-        
+
         if (whr.Status != 200) {
             throw Error("API request failed with status: " whr.Status)
         }
-            
+
         responseText := whr.ResponseText
-        
+
         tempDir := StratsDir "\.download_temp"
         if DirExist(tempDir)
             DirDelete(tempDir, true)
@@ -778,19 +778,19 @@ if (needUpdate) {
         pos := 1
         fileCount := 0
         successCount := 0
-        
+
         while (pos := RegExMatch(responseText, '\{[^}]*"name":"([^"]+\.strat)"[^}]*"download_url":"([^"]+)"[^}]*\}', &match, pos)) {
             fileName := match[1]
             downloadURL := match[2]
             fileCount++
-            
+
             try {
                 fileWhr := ComObject("WinHttp.WinHttpRequest.5.1")
                 fileWhr.SetTimeouts(0, 2000, 2000, 1500)
                 fileWhr.Open("GET", downloadURL, false)
                 fileWhr.SetRequestHeader("User-Agent", "Strategy-Updater")
                 fileWhr.Send()
-                
+
                 if (fileWhr.Status == 200) {
                     ado := ComObject("ADODB.Stream")
                     ado.Type := 1
@@ -805,7 +805,7 @@ if (needUpdate) {
             } catch Error as fileErr {
                 LogToConsole("Network error downloading file '" fileName "': " fileErr.Message, (AlwaysOnTop = 1) ? 0x1000 : 0)
             }
-            
+
             pos += match.Len
             Sleep(30)
         }
@@ -837,7 +837,7 @@ if (needUpdate) {
         DirDelete(tempDir, true)
         IniWrite(A_Now, StateFile, "Cache", "LastUpdateTime")
         IniWrite(newManifestStr, StateFile, "Cache", "CommunityStratFiles")
-        
+
     } catch Error as err {
         LogToConsole("Error while downloading strats: " err.Message, (AlwaysOnTop = 1) ? 0x1000 : 0)
     }
@@ -859,7 +859,7 @@ width := FrameW - 6
 
 Loop Files, StratsDir "\*.strat" {
     localPath := A_LoopFileFullPath
-    
+
     sMap := IniRead(localPath, "Settings", "map", "")
     sDifficulty := IniRead(localPath, "Settings", "difficulty", "")
     sTowers := IniRead(localPath, "Settings", "requiredTowers", "")
@@ -869,7 +869,7 @@ Loop Files, StratsDir "\*.strat" {
     sTime := IniRead(localPath, "Info", "time", "")
     sIncome := IniRead(localPath, "Info", "income", "")
     sModifiers := IniRead(localPath, "Settings", "modifiers", "")
-    
+
     LoadedStrats.Push({
         fileName: A_LoopFileName,
         map: sMap,
@@ -893,7 +893,7 @@ ContentH := StartY
 
 for index, strat in LoadedStrats {
     CurrentY := StartY + ((index - 1) * (CardH + Gap))
-    ContentH := CurrentY + CardH + Gap 
+    ContentH := CurrentY + CardH + Gap
 
     C1X := 10
     C1Y := CurrentY
@@ -903,7 +903,7 @@ for index, strat in LoadedStrats {
 
     hIconBg := CreateGradientButton(56, 56, 8, "0xff2f353f", "0xff15171b", "0xff000000", "0x232c3a50", "", "Segoe UI", 10, 1)
     ChildGui.Add("Picture", "x" (C1X + 10) " y" (C1Y + 30) " w76 h76 +BackgroundTrans", "HBITMAP:*" hIconBg)
-    
+
     diffImg := "Resources/Strats/images/" strat.difficulty ".png"
     if !FileExist(diffImg) {
         LogToConsole("Missing resource file: " diffImg, "Error", 0x1010)
@@ -912,7 +912,7 @@ for index, strat in LoadedStrats {
     }
 
     ChildGui.Add("Picture", "x" (C1X + 75) " y" (C1Y + 30) " w76 h76 +BackgroundTrans", "HBITMAP:*" hIconBg)
-    
+
     coinsCount := 0
     if RegExMatch(strat.income, "i)([\d,]+)\s*coins", &match) {
         coinsCount := Number(StrReplace(match[1], ","))
@@ -939,14 +939,14 @@ for index, strat in LoadedStrats {
 
     ChildGui.SetFont("s11 Bold cWhite", "Segoe UI")
     ChildGui.Add("Text", "x" (C1X + 15) " y" (C1Y + 12) " +BackgroundTrans", strat.title != "" ? strat.title : "Unknown Strat")
- 
+
     ChildGui.SetFont("s9 w500 c7E848E", "Segoe UI")
-    helpDl1 := ChildGui.Add("Text", "x" (C1X + 580) " y" (C1Y + 10) " +BackgroundTrans", "?") 
+    helpDl1 := ChildGui.Add("Text", "x" (C1X + 580) " y" (C1Y + 10) " +BackgroundTrans", "?")
     helpDl1.OnEvent("Click", ((t, a, r, m, d) => (*) => StratInfo(t, a, r, m, d))(
-        strat.title, 
-        strat.author, 
-        strat.towers, 
-        (strat.modifiers != "" ? strat.modifiers : "none"), 
+        strat.title,
+        strat.author,
+        strat.towers,
+        (strat.modifiers != "" ? strat.modifiers : "none"),
         strat.desc
     ))
 
@@ -987,14 +987,14 @@ for index, strat in LoadedStrats {
 
     dl1 := ChildGui.Add("Text", "x" (C1X + 365) " y" (C1Y + 68) " w220 h38 +BackgroundTrans +0x200 Center", "")
     dl1.SetFont("cFFFFFF s10 Bold", "Segoe UI")
-    
+
     dl1.StratFile := strat.fileName
     dl1.OnEvent("Click", DownloadStrat)
 
-    dl1.PicControl := picLoadBtn  
-    dl1.ImgNormal := hBtnNormal   
-    dl1.ImgHover := hBtnHover    
-    GradientButtons.Push(dl1) 
+    dl1.PicControl := picLoadBtn
+    dl1.ImgNormal := hBtnNormal
+    dl1.ImgHover := hBtnHover
+    GradientButtons.Push(dl1)
 }
 
 if (LoadedStrats.Length == 0) {
@@ -1003,18 +1003,18 @@ if (LoadedStrats.Length == 0) {
     ContentH := 220
 }
 
-SliderX := FrameW - 10 
-SliderW := 6 
+SliderX := FrameW - 10
+SliderW := 6
 
 if (ContentH > 0) {
     SliderH := Round(FrameH * (FrameH / ContentH))
-    
+
     if (ContentH <= FrameH) {
         SliderH := FrameH
     } else {
         SliderH := Max(30, SliderH)
     }
-    
+
     if (ContentH > FrameH && CurrentScrollPos > 0) {
         maxScroll := ContentH - FrameH
         scrollPercent := CurrentScrollPos / maxScroll
@@ -1023,13 +1023,13 @@ if (ContentH > 0) {
     } else {
         sliderPos := 0
     }
-    
+
     hSlider := CreateScrollThumb(SliderW, SliderH, 3, "0xFF6EA7FF", "0xff4076ce", "0xd4d4d4")
     hSliderBG := CreateScrollThumb(SliderW, FrameH, 3, "0xff000000", "0xff000000", "0x000000")
-    
+
     global SliderBG := ChildGui.Add("Picture", "x" SliderX " y0 w" SliderW " h" FrameH+ContentH " +BackgroundTrans", "HBITMAP:*" hSliderBG)
     global Slider := ChildGui.Add("Picture", "x" SliderX " y" sliderPos " w" SliderW " h" SliderH " +BackgroundTrans", "HBITMAP:*" hSlider)
-    
+
     SliderBG.Visible := true
     Slider.Visible := true
 }
@@ -1044,8 +1044,8 @@ Tab1_Start.OnEvent("Click", StartStrategy)
 global Tab1_Stop := MainGui.Add("Text",  "x340 y500 w330 h40 Center Background0e0e0f +Border 0x200", "Stop (F2)")
 Tab1_Stop.OnEvent("Click", StopStrategy)
 
-HoverEffect.Push(Tab1_Start) 
-HoverEffect.Push(Tab1_Stop) 
+HoverEffect.Push(Tab1_Start)
+HoverEffect.Push(Tab1_Stop)
 
 ; tab 2 - RECORD ===========================
 
@@ -1057,20 +1057,20 @@ MainGui.SetFont("s9 w400 cAAAAAA")
 global Tab2_Lbl1 := MainGui.Add("Text", "x30 y145 w80 h20 Hidden", "Map:")
 MainGui.SetFont("s9 w400 cFFFFFF")
 global RecMapsD := MainGui.Add("DropDownList", "x80 y142 w220 Hidden vRecMaps", [ ; WARNING: These are all the supported maps for this macro. If a map is not listed here, it is unsupported
-    "Abandoned City", "Area 52", "Autumn Falling", 
-    "Badlands II", "Black Spot Exchange", "Candy Valley", "Cataclysm", "Chess Board", 
-    "Construction Crazy", "Coral Deep", "Crossroads", "Crystal Cave", 
-    "Cyber City", "Dead Ahead", "Derelict Outpost", "Deserted Village", "Dusty Bridges", 
-    "Enchanted Forest", "Farm Lands", "Forest Camp", "Forgetten Docks", "Four Seasons", 
-    "Fungi Island", "Grass Isle", "Happy Home of Robloxia", "Harbor", "Honey Valley", 
-    "Hot Spot", "Iceville", "Infernal Abyss", "Lay By", "Lighthaos", "Marshlands", "Mason Arch", "Medieval Times", "Meltdown", 
-    "Midnight Issue", "Moon Base", "Musaceae Kingdom", "Necropolis", "Nether", "Night Station", 
-    "Northern Lights", "Outskirts Commune", "Pier Pressure", "Pizza Party", "Polluted Wasteland II", 
-    "Portland", "Retro Crossroads", "Retro Lighthouse", "Retro Rocket Arena", "Retro Stained Temple", 
-    "Retro The Heights", "Retro Zone", "Rocket Arena", "Ruby Escort", "Sacred Mountains", 
-    "Sky Islands", "Simplicity", "Space City", "Spring Fever", "Stained Temple", "Sugar Rush", 
-    "The Heavens", "The Heights", "Toyboard", "Tropical Industries", "Tropical Isles", "U-Turn", 
-    "Unknown Garden", "Winter Abyss", "Winter Bridges", "Winter Stronghold", "Wrecked Battlefield", 
+    "Abandoned City", "Area 52", "Autumn Falling",
+    "Badlands II", "Black Spot Exchange", "Candy Valley", "Cataclysm", "Chess Board",
+    "Construction Crazy", "Coral Deep", "Crossroads", "Crystal Cave",
+    "Cyber City", "Dead Ahead", "Derelict Outpost", "Deserted Village", "Dusty Bridges",
+    "Enchanted Forest", "Farm Lands", "Forest Camp", "Forgetten Docks", "Four Seasons",
+    "Fungi Island", "Grass Isle", "Happy Home of Robloxia", "Harbor", "Honey Valley",
+    "Hot Spot", "Iceville", "Infernal Abyss", "Lay By", "Lighthaos", "Marshlands", "Mason Arch", "Medieval Times", "Meltdown",
+    "Midnight Issue", "Moon Base", "Musaceae Kingdom", "Necropolis", "Nether", "Night Station",
+    "Northern Lights", "Outskirts Commune", "Pier Pressure", "Pizza Party", "Polluted Wasteland II",
+    "Portland", "Retro Crossroads", "Retro Lighthouse", "Retro Rocket Arena", "Retro Stained Temple",
+    "Retro The Heights", "Retro Zone", "Rocket Arena", "Ruby Escort", "Sacred Mountains",
+    "Sky Islands", "Simplicity", "Space City", "Spring Fever", "Stained Temple", "Sugar Rush",
+    "The Heavens", "The Heights", "Toyboard", "Tropical Industries", "Tropical Isles", "U-Turn",
+    "Unknown Garden", "Winter Abyss", "Winter Bridges", "Winter Stronghold", "Wrecked Battlefield",
     "Wrecked Battlefield II", "Wretched Front"
 ])
 
@@ -1078,7 +1078,7 @@ MainGui.SetFont("s9 w400 cAAAAAA")
 global Tab2_Lbl2 := MainGui.Add("Text", "x320 y145 w80 h20 Hidden", "Mode:")
 MainGui.SetFont("s9 w400 cFFFFFF")
 global RecDiffCtrl := MainGui.Add("DropDownList", "x380 y142 w220 Hidden vRecDifficulty", [
-    "Easy", "Casual", "Intermediate", "Molten", "Fallen", "Frost", 
+    "Easy", "Casual", "Intermediate", "Molten", "Fallen", "Frost",
     "Hardcore", "Voidcore", "Pizza Party", "Badlands II", "Polluted Wasteland II"
 ])
 
@@ -1087,8 +1087,8 @@ global Tab2_Lbl3 := MainGui.Add("Text", "x30 y235 w80 h20 Hidden", "Modifiers:")
 MainGui.SetFont("s9 w400 c000000")
 
 global RecModifiersCtrl := MainGui.Add("ListBox", "x110 y232 w220 h200 Multi Hidden vRecModifiers", [
-    "Broke", "Exploding", "Flying", "Fog", "Glass", 
-    "Healthy", "Hidden", "Inflation", "Jailed", "Limitation", 
+    "Broke", "Exploding", "Flying", "Fog", "Glass",
+    "Healthy", "Hidden", "Inflation", "Jailed", "Limitation",
     "Committed", "Quarantine", "Speedy"
 ])
 
@@ -1143,7 +1143,7 @@ MainGui.SetFont("s11 w400 c808080", "Segoe UI")
 global Tab2_Btn2 := MainGui.Add("Text", "x340 y500 w330 h40 Center Background0e0e0f +Border 0x200 Hidden", "Stop")
 Tab2_Btn2.OnEvent("Click", StopRecord)
 
-HoverEffect.Push(Tab2_Btn1) 
+HoverEffect.Push(Tab2_Btn1)
 
 ; tab 3 - MULTIPLAYER ===========================
 
@@ -1232,8 +1232,8 @@ Tab4_Btn1.OnEvent("Click", TestWebhook)
 global Tab4_Btn2 := MainGui.Add("Text", "x340 y500 w330 h40 Center Background0e0e0f +Border 0x200 Hidden", "Save Discord Settings")
 Tab4_Btn2.OnEvent("Click", SaveWebhookSettings)
 
-HoverEffect.Push(Tab4_Btn1) 
-HoverEffect.Push(Tab4_Btn2) 
+HoverEffect.Push(Tab4_Btn1)
+HoverEffect.Push(Tab4_Btn2)
 
 DiscordWebhookTab.Push(Tab4_Title,Tab4_Line1,Tab4_Line2,Tab4_Btn1,Tab4_Btn2,Tab4_Info,Tab4_Lbl1,WebhookEnabledCtrl,SendCurrCtrl,WebhookLinkCtrl,WebhookLinkCtrl2,DebugLogsCtrl,WebhookScreenshotsCtrl,WebhookTriumphScreenshotsCtrl,WebhookSepatateTriumphScreenshotsCtrl)
 
@@ -1556,18 +1556,18 @@ SelectTab(ctrl, *) {
     newTab := "Tab" idx
     if (newTab = CurrentTab)
         return
-    
+
     oldIdx := Integer(SubStr(CurrentTab, 4))
     TabCtrl[oldIdx].SetFont("c888888")
     HideAllTabContent()
-    
+
     CurrentTab := newTab
     TabCtrl[idx].SetFont("cFFFFFF")
-    
-    
+
+
     newX := 20 + (idx - 1) * 90
     TabLine.Move(newX, , 80)
-    
+
     ShowTabContent(newTab)
 }
 
@@ -1578,19 +1578,19 @@ Hoverwatchdog(*) {
         hoverTabs.Push(false)
     }
     static activeHoverHwnd := 0
-    static activeGradHwnd := 0 
-    
+    static activeGradHwnd := 0
+
     if (!hMain)
         hMain := MainGui.Hwnd
-        
+
     if (!hChild && IsSet(ChildGui))
         hChild := ChildGui.Hwnd
-    
+
     oldMode := A_CoordModeMouse
     CoordMode("Mouse", "Screen")
     MouseGetPos(&screenX, &screenY, &mouseWin, &mouseCtrl, 2)
     CoordMode("Mouse", oldMode)
-    
+
     try {
         WinGetPos(&mX, &mY,,, "ahk_id " hMain)
         mouseX := screenX - mX
@@ -1599,7 +1599,7 @@ Hoverwatchdog(*) {
         mouseX := 0
         mouseY := 0
     }
-    
+
     if (mouseWin != hMain && mouseWin != hChild) {
         Loop HoverTab.Length {
             if (hoverTabs[A_Index]) {
@@ -1609,15 +1609,15 @@ Hoverwatchdog(*) {
                 hoverTabs[A_Index] := false
             }
         }
-        if (hoverClose) { 
+        if (hoverClose) {
             BtnClose.SetFont("cFFFFFF")
-            hoverClose := false 
+            hoverClose := false
         }
-        if (hoverMin) { 
+        if (hoverMin) {
             BtnMin.SetFont("cFFFFFF")
-            hoverMin := false 
+            hoverMin := false
         }
-        
+
         if (activeHoverHwnd != 0 && IsSet(HoverEffect)) {
             for ctrl in HoverEffect {
                 if (ctrl.Hwnd = activeHoverHwnd) {
@@ -1634,7 +1634,7 @@ Hoverwatchdog(*) {
             }
             activeHoverHwnd := 0
         }
-        
+
         if (activeGradHwnd != 0 && IsSet(GradientButtons)) {
             for ctrl in GradientButtons {
                 if (ctrl.Hwnd = activeGradHwnd) {
@@ -1648,32 +1648,32 @@ Hoverwatchdog(*) {
         }
         return
     }
-    
+
     if (!hClose) {
         hClose := BtnClose.Hwnd
         hMin := BtnMin.Hwnd
     }
-    
+
     if (mouseCtrl = hClose) {
-        if (!hoverClose) { 
+        if (!hoverClose) {
             BtnClose.SetFont("cFF4D4D")
-            hoverClose := true 
+            hoverClose := true
         }
-    } else if (hoverClose) { 
+    } else if (hoverClose) {
         BtnClose.SetFont("cFFFFFF")
-        hoverClose := false 
+        hoverClose := false
     }
 
     if (mouseCtrl = hMin) {
-        if (!hoverMin) { 
+        if (!hoverMin) {
             BtnMin.SetFont("c3A86FF")
-            hoverMin := true 
+            hoverMin := true
         }
-    } else if (hoverMin) { 
+    } else if (hoverMin) {
         BtnMin.SetFont("cFFFFFF")
-        hoverMin := false 
+        hoverMin := false
     }
-    
+
     Loop HoverTab.Length {
         hTab := TabCtrl[A_Index].Hwnd
         if (mouseCtrl = hTab) {
@@ -1743,10 +1743,10 @@ Hoverwatchdog(*) {
         }
     }
 
-    
+
     if (IsSet(GradientButtons) && hChild) {
         matchedGrad := false
-        
+
         try {
             WinGetPos(&chX, &chY,,, "ahk_id " hChild)
             childMouseX := screenX - chX
@@ -1755,17 +1755,17 @@ Hoverwatchdog(*) {
             childMouseX := 0
             childMouseY := 0
         }
-        
+
         for ctrl in GradientButtons {
             if (!ctrl.Visible)
                 continue
 
             ctrl.GetPos(&cX, &cY, &cW, &cH)
-            
+
             if (childMouseX >= cX && childMouseX <= cX + cW && childMouseY >= cY && childMouseY <= cY + cH) {
                 matchedGrad := true
                 if (activeGradHwnd != ctrl.Hwnd) {
-                    
+
                     if (activeGradHwnd != 0) {
                         for oldCtrl in GradientButtons {
                             if (oldCtrl.Hwnd = activeGradHwnd) {
@@ -1776,7 +1776,7 @@ Hoverwatchdog(*) {
                             }
                         }
                     }
-                    
+
                     if (HasProp(ctrl, "PicControl")) {
                         ctrl.PicControl.Value := "HBITMAP:*" ctrl.ImgHover
                     }
@@ -1786,7 +1786,7 @@ Hoverwatchdog(*) {
                 break
             }
         }
-         
+
         if (!matchedGrad && activeGradHwnd != 0) {
             for ctrl in GradientButtons {
                 if (ctrl.Hwnd = activeGradHwnd) {
@@ -1858,13 +1858,13 @@ ShowTabContent(tab) {
                      MouseDelayLbl, MouseDelayTxt, MouseDelayUpDown, KeyDelayLbl, KeyDelayTxt, KeyDelayUpDown]
             ctrl.Visible := true
 
-        
+
         ChainKeyCtrl.Value := ChainKey
         BeatKeyCtrl.Value := BeatKey
         CaravanKeyCtrl.Value := CaravanKey
-        RaiseDeadKeyCtrl.Value := RaiseDeadKey     
+        RaiseDeadKeyCtrl.Value := RaiseDeadKey
         HologramKeyCtrl.Value := HologramKey
-        RepoKeyCtrl.Value := RepoKey       
+        RepoKeyCtrl.Value := RepoKey
         CancelPlacementKeyCtrl.Value := CancelPlacementKey
         AlignCameraKeyCtrl.Value := AlignCameraKey
         PlaceTowerKeyCtrl.Value := PlaceTowerKey
@@ -1876,7 +1876,7 @@ ShowTabContent(tab) {
         HoloKeyCtrl.Value := HoloKey
         ChangeTargetsCTRL.Value := ChangeTargetsKey
         TimeScaleModeCtrl.Text := TimeScaleMode
-        
+
         MouseSpeedUpDown.Value := DefaultMouseSpeed
         MouseSpeedTxt.Value := DefaultMouseSpeed
         MouseDelayUpDown.Value := MouseDelay
@@ -1930,8 +1930,8 @@ YouTubeLink(ctrl, *) {
 }
 
 DownloadStrat(ctrl, *) {
-    nm := ctrl.StratFile 
-    
+    nm := ctrl.StratFile
+
     downloadedStrat := A_WorkingDir "\Resources\Strats" (SubStr(nm, 1, 1) = "\" ? nm : "\" nm)
 
     if (Strategy1Ctrl.Value = "") {
@@ -1947,7 +1947,7 @@ DownloadStrat(ctrl, *) {
         Strategy1Path := downloadedStrat
         IniWrite(downloadedStrat, SettingsFile, "Options", "Strategy1")
     }
-    
+
     LoadStrategyFile(downloadedStrat)
 }
 
@@ -1958,12 +1958,12 @@ OnMouseWheel(wp, lp, msg, hwnd) {
 
     parentH := (ctrlH != "") ? DllCall("GetParent", "Ptr", ctrlH, "Ptr") : 0
     ch := ChildGui.Hwnd
-    
+
     if (maxH = ch || ctrlH = ch || parentH = ch) {
-        
+
         dir := ((wp >> 16) & 0xFFFF) > 0x7FFF ? 1 : 0
         Loop 3 {
-            
+
             SendMessage(0x0115, dir, 0, , "ahk_id " ch)
         }
     }
@@ -1988,24 +1988,24 @@ OnScroll(wp, lp, msg, hwnd) {
     if (newPos != CurrentScrollPos) {
         DllCall("ScrollWindow", "Ptr", hwnd, "Int", 0, "Int", CurrentScrollPos - newPos, "Ptr", 0, "Ptr", 0)
         CurrentScrollPos := newPos
-        
+
         availableTrackSpace := FrameH - SliderH
 
         sliderVisualY := Round((newPos / maxScroll) * availableTrackSpace)
-        
+
         Slider.Move(, sliderVisualY)
-        
+
         DllCall("UpdateWindow", "Ptr", hwnd)
     }
 }
 
 EnableStratRotation(*) {
     global RotateStrategies, SwapAmount, SwapUnit
-    
+
     v := MainGui.Submit(false)
     RotateStrategies := v.RotateStrategies
     IniWrite(RotateStrategies, SettingsFile, "Options", "RotateStrategies")
-    
+
     show := (RotateStrategies = 1)
 
     Tab1_Lbl2.Visible := show
@@ -2036,7 +2036,7 @@ EnableStratRotation(*) {
 
 EnableAutoEquip(*) {
     global AutoEquip
-    
+
     v := MainGui.Submit(false)
     AutoEquip := v.AutoEquip
     IniWrite(AutoEquip, SettingsFile, "Options", "AutoEquip")
@@ -2046,7 +2046,7 @@ SelectStrat1(ctrl, *) {
     global Strategy1Path
     targDir := RecordingsDir
     if (Strategy1Ctrl.Value) {
-        SplitPath(Strategy1Ctrl.Value, , &parentDir) 
+        SplitPath(Strategy1Ctrl.Value, , &parentDir)
         targDir := parentDir
     }
     f := FileSelect("3", targDir, "Select strategy file 1", "Strategy (*.strat)")
@@ -2061,7 +2061,7 @@ SelectStrat2(ctrl, *) {
     global Strategy2Path
     targDir := RecordingsDir
     if (Strategy2Ctrl.Value) {
-        SplitPath(Strategy2Ctrl.Value, , &parentDir) 
+        SplitPath(Strategy2Ctrl.Value, , &parentDir)
         targDir := parentDir
     }
     f := FileSelect("3", targDir, "Select strategy file 2", "Strategy (*.strat)")
@@ -2325,7 +2325,7 @@ StartRecording(ctrl, *) {
     DeleteAllIndicators()
 
     LogToConsole("Recording started.")
-    
+
     ActivateRoblox()
 }
 
@@ -2413,14 +2413,14 @@ PlaceTowerHK(*) {
     global Recording, Towers, RecordedSteps, ActiveRTowerID, CachedMenuUI, isUiPositionSaved, UseNumbersForHotbar, Slots
 
     if (!Recording) {
-        pureKey := RegExReplace(PlaceTowerKey, "[\^+!#]") 
+        pureKey := RegExReplace(PlaceTowerKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(PlaceTowerKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
-    
-    towersStringBackup := Towers 
+
+    towersStringBackup := Towers
 
     MouseGetPos(&mx, &my)
     loop {
@@ -2431,21 +2431,21 @@ PlaceTowerHK(*) {
 
         try {
             sllot := Integer(slotBox.Value)
-            
+
             if (sllot >= 1 && sllot <= 5) {
                 break
             } else {
                 continue
             }
-        } 
+        }
         catch Error {
             continue
         }
     }
     slot := slotBox.Value
-    
+
     suggestedID := GetNextTowerID(slot)
-    
+
     idBox := InputBox("Enter a specific tower id:", "Tower ID", "w300 h130", suggestedID)
     if (idBox.Result = "Cancel")
         return
@@ -2457,7 +2457,7 @@ PlaceTowerHK(*) {
     getRobloxPos(,,&w,&h)
 
     ActivateRoblox()
-    
+
     if UseNumbersForHotbar {
         Send("{" slot "}")
     } else {
@@ -2465,7 +2465,7 @@ PlaceTowerHK(*) {
     }
 
     Sleep(30)
-    
+
 
     MouseMove(mx, my, A_DefaultMouseSpeed)
     Sleep((PotatoMode = 1) ? 100 : 40)
@@ -2484,30 +2484,30 @@ PlaceTowerHK(*) {
     }
 
     ActiveRTowerID := towerID
-    
+
     openedSuccessfully := false
     Loop 10 {
         getRobloxPos(,,&w,&h)
         resV2 := AdvancedImageSearch("Resources\TowerUI\Variant2.png", 0, Round(h / 2), Round(w * 0.3), Round(h * 0.9) - Round(h / 2), 0.5, 1.5)
-        
+
         if (resV2.status == "success" && resV2.score > 0.6) {
-            
+
             if (!isUiPositionSaved) {
-                Sleep(300) 
-                
+                Sleep(300)
+
                 getRobloxPos(,,&w,&h)
                 resV2Final := AdvancedImageSearch("Resources\TowerUI\Variant2.png", 0, Round(h / 2), Round(w * 0.3), Round(h * 0.9) - Round(h / 2), 0.5, 1.5)
-                
+
                 if (resV2Final.status == "success") {
                     CachedMenuUI := {x: resV2Final.x, y: resV2Final.y}
-                    isUiPositionSaved := true 
+                    isUiPositionSaved := true
                     openedSuccessfully := true
                 } else {
                     CachedMenuUI := {x: resV2.x, y: resV2.y}
                     isUiPositionSaved := true
                     openedSuccessfully := true
                 }
-            } 
+            }
             else {
                 openedSuccessfully := true
             }
@@ -2515,7 +2515,7 @@ PlaceTowerHK(*) {
         }
         Sleep(150)
     }
-    
+
     if (!openedSuccessfully) {
         ActiveRTowerID := ""
     }
@@ -2524,9 +2524,9 @@ PlaceTowerHK(*) {
 UpgradeTowerHK(*) {
     global Recording, Towers, RecordedSteps, Commander
     if (!Recording) {
-        pureKey := RegExReplace(UpgradeTowerKey, "[\^+!#]") 
+        pureKey := RegExReplace(UpgradeTowerKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(UpgradeTowerKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2539,7 +2539,7 @@ UpgradeTowerHK(*) {
         iy1 := t.y - 12
         ix2 := ix1 + 24
         iy2 := iy1 + 24
-        
+
         if (mx >= ix1 && mx <= ix2 && my >= iy1 && my <= iy2) {
             closestID := id
             break
@@ -2565,9 +2565,9 @@ UpgradeTowerHK(*) {
 ChangeDJTrackHK(*) {
     global Recording, RecordedSteps
     if (!Recording) {
-        pureKey := RegExReplace(ChangeDJTrackKey, "[\^+!#]") 
+        pureKey := RegExReplace(ChangeDJTrackKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(ChangeDJTrackKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2581,9 +2581,9 @@ ChangeDJTrackHK(*) {
 DeleteTowerRecordingHK(*) {
     global Recording, Towers, RecordedSteps
     if (!Recording) {
-        pureKey := RegExReplace(DeleteTowerRecordingKey, "[\^+!#]") 
+        pureKey := RegExReplace(DeleteTowerRecordingKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(DeleteTowerRecordingKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2599,7 +2599,7 @@ DeleteTowerRecordingHK(*) {
         iy1 := t.y - 12
         ix2 := ix1 + 24
         iy2 := iy1 + 24
-        
+
         if (mx >= ix1 && mx <= ix2 && my >= iy1 && my <= iy2) {
             closestID := id
             break
@@ -2612,7 +2612,7 @@ DeleteTowerRecordingHK(*) {
         }
 
         newSteps := []
-        
+
         escapedID := RegExReplace(closestID, "([\.\ \+\*\?\^\$\(\)\[\]\{\}\|])", "\$1")
 
         for i, step in RecordedSteps {
@@ -2641,9 +2641,9 @@ DeleteTowerRecordingHK(*) {
 SellTowerHK(*) {
     global Recording, Towers, RecordedSteps
     if (!Recording) {
-        pureKey := RegExReplace(SellTowerKey, "[\^+!#]") 
+        pureKey := RegExReplace(SellTowerKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(SellTowerKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2656,7 +2656,7 @@ SellTowerHK(*) {
         iy1 := t.y - 12
         ix2 := ix1 + 24
         iy2 := iy1 + 24
-        
+
         if (mx >= ix1 && mx <= ix2 && my >= iy1 && my <= iy2) {
             closestID := id
             break
@@ -2685,9 +2685,9 @@ SellTowerHK(*) {
 
 AlignCameraHK(*) {
     if (!Recording) {
-        pureKey := RegExReplace(AlignCameraKey, "[\^+!#]") 
+        pureKey := RegExReplace(AlignCameraKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(AlignCameraKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2695,7 +2695,7 @@ AlignCameraHK(*) {
     if (InArray(SpecialMaps, gamemap)) {
         functionName := gamemap . "Path"
 
-        %functionName%() 
+        %functionName%()
     } else {
         AlignCamera()
     }
@@ -2704,9 +2704,9 @@ AlignCameraHK(*) {
 RecordInputsHK(*) {
     global MacroRecording, InputHookObj, MacroSteps, MacroStartTime, RecordedSteps, Recording, KeyDownTimes
     if (!Recording) {
-        pureKey := RegExReplace(RecordInputsKey, "[\^+!#]") 
+        pureKey := RegExReplace(RecordInputsKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(RecordInputsKey, "^([\^+!#]+)", &match) ? match[1] : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2724,12 +2724,12 @@ RecordInputsHK(*) {
         LogToConsole("Recording ALL clicks and keys...!")
         MacroRecording := true
         MacroSteps     := []
-        KeyDownTimes   := Map() 
+        KeyDownTimes   := Map()
         MacroStartTime := A_TickCount
         InputHookObj := InputHook("V")
         InputHookObj.KeyOpt("{All}", "N")
         InputHookObj.OnKeyDown := OnKeyDown
-        InputHookObj.OnKeyUp := OnKeyUp 
+        InputHookObj.OnKeyUp := OnKeyUp
         InputHookObj.Start()
     }
 }
@@ -2739,9 +2739,9 @@ CloneTowerHK(*) {
     static LastCallTime := 0
 
     if (!Recording) {
-        pureKey := RegExReplace(HoloKey, "[\^+!#]") 
+        pureKey := RegExReplace(HoloKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(HoloKey, "^([\^+!#]+)", &match) ? match : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2768,9 +2768,9 @@ BrawlerRepositionHK(*) {
     global Recording, RecordedSteps, ActiveRTowerID
 
     if (!Recording) {
-        pureKey := RegExReplace(HoloKey, "[\^+!#]") 
+        pureKey := RegExReplace(HoloKey, "[\^+!#]")
         SEND_modifiers := RegExMatch(HoloKey, "^([\^+!#]+)", &match) ? match : ""
-        
+
         SendEvent("{Blind}" SEND_modifiers "{" pureKey "}")
         return
     }
@@ -2815,7 +2815,7 @@ ActivateRaiseTheDeadHK(*) {
 
     if (RecordedSteps.Length > 0) {
         lastStep := RecordedSteps[RecordedSteps.Length]
-        
+
         if (InStr(lastStep, "ActivateRaiseTheDead") && LastCallTime > 0) {
             waitTime := currentTime - LastCallTime
         }
@@ -2912,7 +2912,7 @@ SimplicityPath() {
     attempts := 0
     Loop {
         AlignCamera(false, false)
-        SendEvent("{sc01f Down}") 
+        SendEvent("{sc01f Down}")
         HyperSleep(2500)
         SendEvent("{sc01f Up}")
         HyperSleep(300)
@@ -2944,13 +2944,13 @@ SimplicityPath() {
             FoundMap := false
             Loop 5 {
                 res := AdvancedImageSearch("Resources\Maps\Simplicity.png", 0, 0, w, h, 0.5, 2)
-                
+
                 if (res.score > 0.65) {
                     FoundMap := true
                     LogToConsole("break " res.score )
                     break
                 }
-                
+
                 Sleep(300)
             }
 
@@ -3064,7 +3064,7 @@ ChangeTargets(towerID, target) {
                 right := AdvancedImageSearch("Resources/TowerUI/right.png", left.x+20,0,w/2,h/1.3)
                 if right.score > 0.66 {
                     break
-                } 
+                }
             }
             Sleep 150
         }
@@ -3137,7 +3137,7 @@ ChangeTargets(towerID, target) {
 
         getRobloxPos(,,&w,&h)
         checkTargetImg := AdvancedImageSearch("Resources/TowerUI/" target ".png", 0,0,w/2,h/1.3)
-        
+
         if (checkTargetImg.score > 0.66) {
             LogToConsole("Successfully changed tower's target to " target)
             break
@@ -3145,7 +3145,7 @@ ChangeTargets(towerID, target) {
 
         bestScore := 0
         detectedTarget := "First Enemy"
-        
+
         for index, name in targets {
             imgScan := AdvancedImageSearch("Resources/TowerUI/" name ".png", 0,0,w/2,h/1.3)
             if (imgScan.score > bestScore) {
@@ -3155,7 +3155,7 @@ ChangeTargets(towerID, target) {
         }
 
         Towers[towerID].target := detectedTarget
-        
+
         if (detectedTarget == target) {
             LogToConsole("Successfully changed tower's target to " target)
             break
@@ -3215,14 +3215,14 @@ CloneTower(towerId, x, y, wait := 0) {
 
         while (!found && (A_TickCount - startTime < 4000)) {
             loop 15 {
-                variationY := A_Index - 8 
+                variationY := A_Index - 8
 
                 MouseMove(baseX, baseY + ScaleY(variationY))
-                Sleep 180 
+                Sleep 180
 
                 MouseGetPos(&mx, &my)
-                
-                cashX := mx + ScaleX(69) 
+
+                cashX := mx + ScaleX(69)
                 cashY := my - ScaleY(59)
 
                 x1 := cashX - 30
@@ -3236,7 +3236,7 @@ CloneTower(towerId, x, y, wait := 0) {
                     break 2
                 }
             }
-            
+
             if (!found) {
                 Sleep 100
             }
@@ -3255,7 +3255,7 @@ CloneTower(towerId, x, y, wait := 0) {
             canUseAbility := false
             continue
         }
-        
+
         openedUI := waitForTowerUI(,,500)
         if (openedUI) {
             LogToConsole("Failed to clone tower: accidentally opened upgrade ui! Retrying again..")
@@ -3392,7 +3392,7 @@ BrawlerReposition(towerId, x, y) {
         }
 
         attempts := 0
-        
+
         Loop {
             opened := waitForTowerUI()
             if opened {
@@ -3494,21 +3494,21 @@ OnKeyDown(ih, vk, sc) {
     global MacroSteps, MacroStartTime, MacroRecording, KeyDownTimes
     if (!MacroRecording)
         return
-        
+
     if (vk = 0xA0 || vk = 0xA1 || vk = 0xA2 || vk = 0xA3
         || vk = 0xA4 || vk = 0xA5 || vk = 0x5B || vk = 0x5C
         || vk = 0x11 || vk = 0x12 || vk = 0x41)
         return
-        
+
     keyId := vk "-" sc
-    
+
     if (KeyDownTimes.Has(keyId))
         return
-        
+
     currentTime := A_TickCount
     elapsed := currentTime - MacroStartTime
     MacroStartTime := currentTime
-    
+
     KeyDownTimes[keyId] := currentTime
     MacroSteps.Push("Sleep(" elapsed ")")
 }
@@ -3517,30 +3517,30 @@ OnKeyUp(ih, vk, sc) {
     global MacroSteps, MacroStartTime, MacroRecording, KeyDownTimes
     if (!MacroRecording)
         return
-        
+
     if (vk = 0xA0 || vk = 0xA1 || vk = 0xA2 || vk = 0xA3
         || vk = 0xA4 || vk = 0xA5 || vk = 0x5B || vk = 0x5C
         || vk = 0x11 || vk = 0x12 || vk = 0x41)
         return
-        
+
     currentTime := A_TickCount
     keyId := vk "-" sc
-    
+
     holdDuration := 50
     if (KeyDownTimes.Has(keyId)) {
         holdDuration := currentTime - KeyDownTimes[keyId]
-        KeyDownTimes.Delete(keyId) 
+        KeyDownTimes.Delete(keyId)
     }
 
     elapsed := currentTime - MacroStartTime
     MacroStartTime := currentTime
-    
+
     keyName := GetKeyName(Format("vk{:02X}sc{:03X}", vk, sc))
     if (keyName = "")
         keyName := "VK" Format("{:02X}", vk)
-        
+
     MacroSteps.Push('Send("' keyName '", hold:=' holdDuration ')')
-    
+
     if (elapsed > 0) {
         MacroSteps.Push("Sleep(" elapsed ")")
     }
@@ -3548,7 +3548,7 @@ OnKeyUp(ih, vk, sc) {
 
 ^SC02C:: {
     global RecordedSteps, Towers, Recording, Commander
-    
+
     if (!Recording) {
         Send("^{SC02C}")
         return
@@ -3561,8 +3561,8 @@ OnKeyUp(ih, vk, sc) {
     LogToConsole("Undo: Reverting step -> " lastStep)
 
     if RegExMatch(lastStep, "i)UpgradeTower\s*\(\s*([^\n,\)]+)", &matchUpgrade) {
-        towerID := Trim(matchUpgrade[1]) 
-        
+        towerID := Trim(matchUpgrade[1])
+
         if (Towers.Has(towerID)) {
             Towers[towerID].level := Max(0, Towers[towerID].level - 1)
             UpdateTowerIndicator(towerID)
@@ -3572,8 +3572,8 @@ OnKeyUp(ih, vk, sc) {
 
     if RegExMatch(lastStep, "i)SpawnTower\s*\(\s*[^,]+\s*,\s*[^,]+\s*,\s*[^,]+\s*,\s*(.*?)\s*\)", &matchPlace)
     {
-        towerID := matchPlace[1] 
-        
+        towerID := matchPlace[1]
+
         if (Towers.Has(towerID)) {
             if (Towers[towerID].HasProp("hwnd") && Towers[towerID].hwnd && WinExist("ahk_id " Towers[towerID].hwnd)) {
                 WinClose("ahk_id " Towers[towerID].hwnd)
@@ -3614,7 +3614,7 @@ OnKeyUp(ih, vk, sc) {
         iy1 := t.y - 16
         ix2 := ix1 + 32
         iy2 := iy1 + 32
-        
+
         if (mx >= ix1 && mx <= ix2 && my >= iy1 && my <= iy2) {
             towerID := id
             break
@@ -3689,17 +3689,17 @@ TestWebhook(ctrl, *) {
 TestBot(ctrl, *) {
     global BotToken, ChannelID
     v := MainGui.Submit(false)
-    
+
     if (v.BotToken = "") {
         ModernMsgBox("Error", "Enter a bot token first!", "OK", "WARNING")
         return
     }
-    
+
     if (v.ChannelID = "") {
         ModernMsgBox("Error", "Enter a channel ID first!", "OK", "WARNING")
         return
     }
-    
+
     try {
         whr := ComObject("WinHttp.WinHttpRequest.5.1")
         whr.Option[9] := 2720
@@ -3709,7 +3709,7 @@ TestBot(ctrl, *) {
         whr.SetRequestHeader("Content-Type", "application/json")
         whr.SetTimeouts(0, 3000, 3000, 3000)
         whr.Send('{"content": "✅ Bot test successful! Sigmacro TDS is connected."}')
-        
+
         if (whr.Status = 200 || whr.Status = 201 || whr.Status = 204) {
             ModernMsgBox("Success", "Bot test successful! Message sent to channel.", "OK")
         } else {
@@ -3720,7 +3720,7 @@ TestBot(ctrl, *) {
                 if response.Has("message")
                     errorMsg .= "`n`nDiscord Error: " response["message"]
             }
-            
+
             switch whr.Status {
                 case 401:
                     errorMsg .= "`n`nInvalid bot token!"
@@ -3731,7 +3731,7 @@ TestBot(ctrl, *) {
                 case 429:
                     errorMsg .= "`n`nRate limited! Try again later."
             }
-            
+
             ModernMsgBox("Error", errorMsg, "OK", "WARNING")
         }
     } catch as err {
@@ -3784,24 +3784,24 @@ NormalizeKey(keyName) {
 
     if !RegExMatch(keyName, "^([~!#^+<>*]*)(.*)$", &Match)
         return keyName
-        
+
     modifiers := Match[1]
     pureKey   := Match[2]
 
     if (StrLen(pureKey) > 1)
         return keyName
-    
+
     res := DllCall("User32.dll\VkKeyScanW", "UShort", Ord(pureKey), "Short")
     vk := res & 0xFF
-    
+
     if (vk = 0xFF || vk = 0)
         return keyName
-    
+
     sc := DllCall("User32.dll\MapVirtualKeyW", "UInt", vk, "UInt", 0, "UInt")
-    
+
     if (!sc)
         return keyName
-    
+
     return modifiers . Format("sc{:03X}", sc)
 }
 
@@ -3822,14 +3822,14 @@ SaveAllSettings(ctrl, *) {
     tempCancelPlacementKey := SubStr(RegExReplace(CancelPlacementKeyCtrl.Value, "\s", ""), 1, 1)
     tempUpgradeTowerGKey := SubStr(RegExReplace(UpgradeTowerGCtrl.Value, "\s", ""), 1, 1)
     tempUpgradeTowerGBKey := SubStr(RegExReplace(UpgradeTowerGBCtrl.Value, "\s", ""), 1, 1)
-    
-    if (tempChainKey = "")           
+
+    if (tempChainKey = "")
         tempChainKey := "C"
-    if (tempBeatKey = "")            
+    if (tempBeatKey = "")
         tempBeatKey  := "B"
-    if (tempCaravanKey = "")         
+    if (tempCaravanKey = "")
         tempCaravanKey := "J"
-    if (tempCancelPlacementKey = "") 
+    if (tempCancelPlacementKey = "")
         tempCancelPlacementKey := "Q"
     if (tempUpgradeTowerGKey = "")
         tempUpgradeTowerGKey := "E"
@@ -3847,7 +3847,7 @@ SaveAllSettings(ctrl, *) {
     tempChangeTargetsKey := NormalizeKey(ChangeTargetsCTRL.Value)
 
     UsedKeys := Map()
-    
+
     KeysToCheck := [
         {val: NormalizeKey(tempChainKey), name: "Call of Arms Ability"},
         {val: NormalizeKey(tempBeatKey), name: "Drop the Beat Ability"},
@@ -3868,17 +3868,17 @@ SaveAllSettings(ctrl, *) {
 
     for item in KeysToCheck {
         if (item.val = "") {
-            MsgBox("Error: Empty hotkey detected!`n`n" 
+            MsgBox("Error: Empty hotkey detected!`n`n"
             . "The hotkey is assigned to: `"" item.name "`"`n"
             . "Please change it before saving.", "Empty Hotkey", 0x10)
             return
         }
         if UsedKeys.Has(item.val) {
-            MsgBox("Error: Duplicate hotkey detected!`n`n" 
+            MsgBox("Error: Duplicate hotkey detected!`n`n"
                  . "The hotkey is assigned to: `"" UsedKeys[item.val] "`"`n"
                  . "And also that hotkey is assigned to: `"" item.name "`"`n`n"
                  . "Please change it before saving.", "Duplicate Hotkey", 0x10)
-            return 
+            return
         }
         UsedKeys[item.val] := item.name
     }
@@ -3893,7 +3893,7 @@ SaveAllSettings(ctrl, *) {
     oldRecordingKeys := [PlaceTowerKey, UpgradeTowerKey, AlignCameraKey, ChangeDJTrackKey,
         SellTowerKey, DeleteTowerRecordingKey, RecordInputsKey, HoloKey, ChangeTargetsKey]
 
-    
+
     PlaceTowerKey := tempPlaceTowerKey
     UpgradeTowerKey := tempUpgradeTowerKey
     AlignCameraKey := tempAlignCameraKey
@@ -3921,12 +3921,12 @@ SaveAllSettings(ctrl, *) {
     UseNumbersForHotbar := UseNumbersForHotbarCtrl.Value
     CollectPlaytimeRewards := CollectPlaytimeRewardsCtrl.Value
     UseHForUpgrade := UseUpgradeHCtrl.Value
-    
+
     DefaultMouseSpeed := MouseSpeedUpDown.Value
     MouseDelay := MouseDelayUpDown.Value
     KeyDelay := KeyDelayUpDown.Value
     UpgradeDelayCtrl.Value := UpgradeDelay
-    
+
     IniWrite(ChainKey, SettingsFile, "Hotkeys", "Chain")
     IniWrite(BeatKey, SettingsFile, "Hotkeys", "Beat")
     IniWrite(CaravanKey, SettingsFile, "Hotkeys", "Caravan")
@@ -3998,7 +3998,7 @@ SaveAllSettings(ctrl, *) {
     }
 
     LegacyMode := LegacyModeCtrl.Value
-    
+
     SetDefaultMouseSpeed(DefaultMouseSpeed)
     SetMouseDelay(MouseDelay)
     SetKeyDelay(KeyDelay)
@@ -4040,9 +4040,9 @@ LegacyModeInfo(*) {
 }
 
 CheckVipLink(ctrl, *) {
-    
+
     str := Trim(VipLinkCtrl.Value)
-    
+
     if (RegExMatch(str, "i)roblox\.com\/(?:[a-z]{2}\/)?games\/3260590327\/[^\/]*\?privateServerLinkCode=(?<code>[a-z0-9]{32})", &m)) {
         UseVipServerCtrl.Value := 1
         return
@@ -4056,7 +4056,7 @@ CheckVipLink(ctrl, *) {
                 return
             }
         } catch Error {
-            
+
         }
     }
     UseVipServerCtrl.Value := 0
@@ -4244,10 +4244,10 @@ LoadStrategyFile(file) {
     inSteps := false
     Loop Read, file {
         line := Trim(A_LoopReadLine)
-        if (line ~= "i)^\[Settings\]") { 
+        if (line ~= "i)^\[Settings\]") {
             inSteps := false
         }
-        if (line ~= "i)^\[Steps\]")    { 
+        if (line ~= "i)^\[Steps\]")    {
             inSteps := true
         }
         if (inSteps && line != "") {
@@ -4255,7 +4255,7 @@ LoadStrategyFile(file) {
         }
     }
 
-    
+
     for i, step in RecordedSteps {
         if RegExMatch(step, "i)SpawnTower\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*(.*?)\s*\)", &m) {
             towerID := Trim(m[1])
@@ -4288,7 +4288,7 @@ RunStrategy(stratFile := "", skipRestart := false) {
     if (RotateStrategies) {
         SwapAmount := Integer(IniRead(SettingsFile, "Options", "SwapAmount", 4))
         SwapUnit := IniRead(SettingsFile, "Options", "SwapUnit", "Runs")
-        
+
         timeToSwitch := false
         if (SwapUnit = "Minutes") {
             if (A_TickCount - CurrentStratStartTime > SwapAmount * 60000)
@@ -4297,7 +4297,7 @@ RunStrategy(stratFile := "", skipRestart := false) {
             if (CurrentRunCount >= SwapAmount)
                 timeToSwitch := true
         }
-        
+
         if (timeToSwitch) {
             SwitchToNextStrategy(&stratName)
             switched := true
@@ -4378,7 +4378,7 @@ RunStrategy(stratFile := "", skipRestart := false) {
     activateTimescale()
 
     ClickReady()
-    
+
     PlayStrategy()
 }
 
@@ -4409,9 +4409,9 @@ PlayStrategy() {
                 nextStep := RecordedSteps[lookAhead]
                 if RegExMatch(nextStep, "i)UpgradeTower\s*\(\s*" currentID "\s*(?:,\s*(?:false|true)\s*)?(?:,\s*(\d+)\s*)?(?:,\s*(\d+)\s*)?(?:,\s*(\d+)\s*)?\s*\)", &mN) {
                     countUpgrades += (mN[1] != "") ? Integer(mN[1]) : 1
-                    if (mN[2] != "") 
+                    if (mN[2] != "")
                         currentPath := Integer(mN[2])
-                    if (mN[3] != "") 
+                    if (mN[3] != "")
                         currentpathLevel := Integer(mN[3])
                     lookAhead++
                 } else {
@@ -4430,7 +4430,7 @@ PlayStrategy() {
         } else {
             try {
                 ExecuteStep(step)
-            } catch Error as e { 
+            } catch Error as e {
                 LogToConsole("ERROR executing step " . i . ": " . step . " '" . e.Message . "' ")
             }
             i++
@@ -4444,7 +4444,7 @@ PlayStrategy() {
         LastOpenedTowerID := ""
         Sleep 3000
     }
-    ;If the macro doesn't replaying again after win/loss it's a watchdog.ahk issue. Please report it if this happened to you. 
+    ;If the macro doesn't replaying again after win/loss it's a watchdog.ahk issue. Please report it if this happened to you.
     ;Do not add anything here.
 }
 
@@ -4462,7 +4462,7 @@ ExecuteStep(step) {
         UpgradeTower(Trim(m[1]), (m[2]="true"), (m[3]!="") ? Integer(m[3]) : 1, (m[4]!="") ? Integer(m[4]) : 0, (m[5]!="") ? Integer(m[5]) : 4)
         return
     }
-    
+
     if RegExMatch(step, "i)CloneTower\s*\(\s*([^,]+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)", &m) {
         CloneTower(Trim(m[1]), Integer(m[2]), Integer(m[3]), Integer(m[4]))
         return
@@ -4698,7 +4698,7 @@ EquipTowers(towers) {
 
         Sleep(600)
         failCount := 0
-        
+
         InnerStart := A_TickCount
         Loop {
             X1 := Round(rw * 0.4)
@@ -4736,7 +4736,7 @@ EquipTowers(towers) {
         }
         Sleep(400)
     }
-    
+
     Loop Parse, towers, ","
     {
         ActivateRoblox()
@@ -4746,7 +4746,7 @@ EquipTowers(towers) {
         regulartower := RegExMatch(tower, "i)\b(Regular|R\.|R)\b") ? true : false
 
         towerToEnter := RegExReplace(tower, "i)\b(Golden|G\.|G|Regular|R\.|R)\b\s*|\.")
-        towerToEnter := Trim(towerToEnter) 
+        towerToEnter := Trim(towerToEnter)
 
         Click(srchX, srchY)
         Sleep(150)
@@ -4771,11 +4771,11 @@ EquipTowers(towers) {
             if (resEquip.status == "success" && resEquip.score > 0.4) {
                 If (PixelSearch(&eX, &eY, resEquip.x-40, resEquip.y-25, resEquip.x+40, resEquip.y+25, 0x45DC4A, 7)) {
                     Click(resEquip.x, resEquip.y)
-                    
+
                     if (goldtower) {
                         GoldStart := A_TickCount
                         Loop {
-                            resGolden := AdvancedImageSearch("Resources\notgolden.png", X1, Y1, W, H) 
+                            resGolden := AdvancedImageSearch("Resources\notgolden.png", X1, Y1, W, H)
                             if (resGolden.status == "success" && resGolden.score > 0.55) {
                                 If (PixelSearch(&eX, &eY, resGolden.x-40, resGolden.y-25, resGolden.x+40, resGolden.y+25, 0x1E1E1E, 4)) {
                                     Click(resGolden.x, resGolden.y)
@@ -4788,11 +4788,11 @@ EquipTowers(towers) {
                             Sleep(400)
                         }
                     }
-                    
+
                     if (regulartower) {
                         RegStart := A_TickCount
                         Loop {
-                            resGolden := AdvancedImageSearch("Resources\golden.png", X1, Y1, W, H, 0.4, 2) 
+                            resGolden := AdvancedImageSearch("Resources\golden.png", X1, Y1, W, H, 0.4, 2)
                             if (resGolden.status == "success" && resGolden.score > 0.55) {
                                 If (PixelSearch(&eX, &eY, resGolden.x-40, resGolden.y-25, resGolden.x+40, resGolden.y+25, 0xFFC11F, 8)) {
                                     Click(resGolden.x, resGolden.y)
@@ -4826,7 +4826,7 @@ EquipTowers(towers) {
     } else if (savedCloseX != 0 && savedCloseY != 0) {
         Click(savedCloseX, savedCloseY)
     }
-    
+
     LogToConsole("Successfully equipped towers: " towers, true, false)
     IniWrite(1, StateFile, "State", "Equipped")
 }
@@ -4857,12 +4857,12 @@ CheckRestart() {
         ActivateRoblox()
         SendEvent("{" CancelPlacementKey "}")
         getRobloxPos(,, &w, &h)
-        
+
         resRevive := AdvancedImageSearch("Resources\use_revive_ticket.png", w * 0.2, h * 0.2, w * 0.6, h * 0.7)
 
         if (resRevive.status == "success" && resRevive.score > 0.7) {
             resCancel := AdvancedImageSearch("Resources\cancel.png", w * 0.2, h * 0.2, w * 0.6, h * 0.7)
-            
+
             if (resCancel.status == "success" && resCancel.score > 0.7) {
                 ActivateRoblox()
                 Click(resCancel.x, resCancel.y)
@@ -4882,7 +4882,7 @@ CheckRestart() {
                 res := resRestart.score > resRestart2.score ? resRestart : resRestart2
                 IsRestarting := true
                 LogToConsole("Restarting the match")
-                if !(MultiplayerEnabled) { 
+                if !(MultiplayerEnabled) {
                     Click(res.x, res.y)
                 } else {
                     totalPartyMembers := 0
@@ -4912,7 +4912,7 @@ CheckRestart() {
         if (UsePlayAgainBtn = "1" || UsePlayAgainBtn = 1) {
 
             resReplay := AdvancedImageSearch("Resources\PlayAgain.png", 0, h * 0.5, w, h*0.5, 0.5, 1.5, 0.025)
-            
+
             if (resReplay.status == "success" && resReplay.score > 0.64) {
                 if (MultiplayerEnabled && PlayerRole = "Host") {
                     Sleep 5000
@@ -4968,7 +4968,7 @@ RunRoblox(doReload := true) {
                 robloxopened := true
                 break
             }
-                
+
             Sleep(1000)
         }
         if (!robloxopened && doReload) {
@@ -5001,11 +5001,11 @@ RunRoblox(doReload := true) {
             res0 := AdvancedImageSearch("Resources/Play.png", Round(w * 0.25), Round(h * 0.66), Round(w * 0.75), Round(h * 0.34))
             if (res0.status = "success" && res0.score > 0.65) {
                 break
-            } 
+            }
             Sleep(1500)
         }
         SendEvent("{sc00F}")
-        return true 
+        return true
     }
 }
 
@@ -5023,12 +5023,12 @@ ExitFullScreen() {
 }
 
 CloseRoblox() {
-	
+
 	if (hwnd := GetRobloxHWND())
 	{
         getRobloxPos(,,,&windowHeight)
 		GetRobloxClientPos(hwnd)
-		if (windowHeight >= 500) 
+		if (windowHeight >= 500)
 		{
 			ActivateRoblox()
 			PrevKeyDelay := A_KeyDelay
@@ -5039,9 +5039,9 @@ CloseRoblox() {
 		try WinClose "Roblox"
 		Sleep 500
 		try WinClose "Roblox"
-		Sleep 4500 
+		Sleep 4500
 	}
-	
+
 	for p in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name LIKE '%Roblox%' OR CommandLine LIKE '%ROBLOXCORPORATION%'")
 		ProcessClose p.ProcessID
 }
@@ -5051,14 +5051,14 @@ resetCharacter() {
 	{
         getRobloxPos(,,,&windowHeight)
 		GetRobloxClientPos(hwnd)
-		if (windowHeight >= 500) 
+		if (windowHeight >= 500)
 		{
             LogToConsole("Resetting character...")
 			ActivateRoblox()
 			send "{" SC_Esc "}"
-            Sleep 550 
+            Sleep 550
             send "{" SC_R "}"
-            Sleep 550 
+            Sleep 550
             send "{" SC_Enter "}"
 		}
 	}
@@ -5072,7 +5072,7 @@ SwitchToNextStrategy(&stratName) {
         LoadStrategyFile(Strategy2Path)
         CurrentRotationIndex := 2
         IniWrite(2, StateFile, "State", "CurrentRotationIndex")
-        stratName := Strategy2Path 
+        stratName := Strategy2Path
     } else {
         LoadStrategyFile(Strategy1Path)
         CurrentRotationIndex := 1
@@ -5129,7 +5129,7 @@ JoinGame() {
 
     startTime := A_TickCount
     Loop {
-        if (A_TickCount - startTime > 80000) { 
+        if (A_TickCount - startTime > 80000) {
             SafeReload()
             break
         }
@@ -5138,14 +5138,14 @@ JoinGame() {
         y1 := Round(h * 0.66)
         x2 := Round(w * 0.75)
         y2 := Round(h * 0.34)
-        
+
         res := AdvancedImageSearch("Resources\Play.png", x1, y1, x2, y2)
         if (res.status == "success" && res.score > 0.65) {
             ActivateRoblox()
             if (CollectPlaytimeRewards = "1" || CollectPlaytimeRewards = 1) {
                 claimPlaytimeRewards()
             }
-            
+
             LowerGraphics()
             Sleep(50)
 
@@ -5157,11 +5157,11 @@ JoinGame() {
                 } else {
                     CreateParty(res.x, res.y)
                 }
-                    
+
             }
 
             LogToConsole("Joining " difficulty "...", true, false)
-            
+
             Click(res.x, res.y)
             break
         }
@@ -5182,7 +5182,7 @@ JoinGame() {
             if (A_TickCount - startTime > 20000) {
                 newStartTime := A_TickCount
                 res := AdvancedImageSearch("Resources\Play.png", x1, y1, x2, y2)
-                if (res.status == "success" && res.score > 0.65) {   
+                if (res.status == "success" && res.score > 0.65) {
                     Click(res.x, res.y)
                     startTime := A_TickCount
                 } else {
@@ -5196,7 +5196,7 @@ JoinGame() {
             res := AdvancedImageSearch("Resources/" modeImg, 0, 0, w, h)
             if (res.status = "success" && res.score >= 0.67) {
                 Click(res.x, res.y)
-                break 
+                break
             }
             Sleep(100)
         }
@@ -5209,7 +5209,7 @@ JoinGame() {
         if (A_TickCount - startTime > 20000) {
             newStartTime := A_TickCount
             res := AdvancedImageSearch("Resources\Play.png", x1, y1, x2, y2)
-            if (res.status == "success" && res.score > 0.7) {   
+            if (res.status == "success" && res.score > 0.7) {
                 Click(res.x, res.y)
                 startTime := A_TickCount
             } else {
@@ -5222,7 +5222,7 @@ JoinGame() {
         res := AdvancedImageSearch("Resources/" difficulty ".png", 0, 0, w, h)
         if (res.status = "success" && res.score >= 0.7) {
             Click(res.x, res.y)
-            break 
+            break
         }
         Sleep(100)
     }
@@ -5231,7 +5231,7 @@ JoinGame() {
     startTime := A_TickCount
     Loop {
         getRobloxPos(,, &w, &h)
-        if (A_TickCount - startTime > 40000) { 
+        if (A_TickCount - startTime > 40000) {
             SafeReload()
             break
         }
@@ -5239,7 +5239,7 @@ JoinGame() {
             res := AdvancedImageSearch("Resources/Solo.png", 0, Round(h * 0.2), Round(w * 0.7), Round(h * 0.55))
             if (res.status = "success" && res.score >= 0.7) {
                 Click(res.x, res.y)
-                break 
+                break
             }
         } else {
             totalPartyMembers := 0
@@ -5262,7 +5262,7 @@ JoinGame() {
 
             if (res.status = "success" && res.score >= 0.7) {
                 Click(res.x, res.y)
-                break 
+                break
             }
 
         }
@@ -5296,7 +5296,7 @@ CreateParty(x, y) {
                 CloseX := resclose.x
                 CloseY := resclose.y
                 break 2
-            } 
+            }
             if (A_TickCount - InnerStartTime > 5000)
                 break
             Sleep(500)
@@ -5377,7 +5377,7 @@ CreateParty(x, y) {
             LogToConsole("All players: " PartyMembers " have joined!")
             break
         }
-        if (A_TickCount - waitStartTime > 30000) { 
+        if (A_TickCount - waitStartTime > 30000) {
             sy := Round(h*0.1)
             xs := 0
             Loop Parse, PartyMembers, "," {
@@ -5405,7 +5405,7 @@ CreateParty(x, y) {
 
     If (resclose.status = "success" && resclose.score >= 0.7) {
         Click(resclose.x, resclose.y)
-    } 
+    }
     Sleep 200
 }
 
@@ -5442,7 +5442,7 @@ AcceptInvite(x, y) {
                 CloseX := resclose.x
                 CloseY := resclose.y
                 break 2
-            } 
+            }
             if (A_TickCount - InnerStartTime > 5000)
                 break
             Sleep(500)
@@ -5495,7 +5495,7 @@ AcceptInvite(x, y) {
                 break
             }
         }
-        if (A_TickCount - InnerStartTime > 180000) { 
+        if (A_TickCount - InnerStartTime > 180000) {
             LogToConsole("Didn't receive an invite from the host within 3 minutes! Reloading the script and rejoining...", true)
             SafeReload()
         }
@@ -5574,9 +5574,9 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
             Loop 3 {
                 getRobloxPos(&x, &y, &w, &h)
                 res := AdvancedImageSearch(image, 0,0,Round(w/2),h)
-                if (res.status == "success" && res.score >= 0.51) { 
+                if (res.status == "success" && res.score >= 0.51) {
                     foundObject := true
-                    break 
+                    break
                 }
                 Sleep(500)
             }
@@ -5584,7 +5584,7 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
             if (!foundObject) {
                 LogToConsole("Wrong camera position!")
                 SendEvent("{Left down}")
-                Sleep(1500) 
+                Sleep(1500)
                 SendEvent("{Left up}")
                 Sleep(50)
             }
@@ -5595,7 +5595,7 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
         Sleep(7500)
         AlignCamera(false, false)
     }
-    
+
     if (difficulty = "Hardcore" || difficulty = "Voidcore") {
         attempts := 0
 
@@ -5606,7 +5606,7 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
             Sleep(200)
             ActivateRoblox()
             Sleep(600)
-            SendEvent("{sc011 down}")  
+            SendEvent("{sc011 down}")
             Sleep(3550)
             SendEvent("{sc011 up}")
             Sleep(300)
@@ -5639,7 +5639,7 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
                     break
                 }
             }
-            
+
             if (attempts >= 5) {
                 LogToConsole("Map is not found after 5 attempts! Reloading...", true)
                 SafeReload()
@@ -5651,7 +5651,7 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
                 Sleep(8000)
                 attempts++
                 SendEvent("{Left down}")
-                Sleep(1500) 
+                Sleep(1500)
                 SendEvent("{Left up}")
                 Sleep(50)
                 continue
@@ -5665,48 +5665,48 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
         ActivateRoblox()
         Sleep(100)
 
-        SendEvent("{sc011 down}")  
+        SendEvent("{sc011 down}")
         HyperSleep(400)
         SendEvent("{sc011 up}")
         Sleep(200)
 
-        if (FoundSlot = 1) { 
+        if (FoundSlot = 1) {
             SendEvent("{sc01e down}")
             Sleep(1400)
             SendEvent("{sc01e up}")
-            Sleep(600) 
-        } else if (FoundSlot = 2) { 
+            Sleep(600)
+        } else if (FoundSlot = 2) {
             SendEvent("{sc01e down}")
             Sleep(500)
             SendEvent("{sc01e up}")
-            Sleep(600) 
-        } else if (FoundSlot = 3) { 
+            Sleep(600)
+        } else if (FoundSlot = 3) {
             SendEvent("{sc020 down}")
             Sleep(500)
             SendEvent("{sc020 up}")
-            Sleep(600) 
-        } else if (FoundSlot = 4) { 
+            Sleep(600)
+        } else if (FoundSlot = 4) {
             SendEvent("{sc020 down}")
             Sleep(1400)
             SendEvent("{sc020 up}")
-            Sleep(600) 
+            Sleep(600)
         }
 
         if (modifiers != "")
             ApplyModifiers()
 
-        SendEvent("{sc012 down}")  
+        SendEvent("{sc012 down}")
         Sleep(1000)
         SendEvent("{sc012 up}")
         Sleep(100)
     } else {
         ActivateRoblox()
         Sleep(150)
-        SendEvent("{sc01f down}") 
+        SendEvent("{sc01f down}")
         Sleep(1900)
         SendEvent("{sc01f up}")
         Sleep(700)
-        SendEvent("{sc01e down}") 
+        SendEvent("{sc01e down}")
         Sleep(1800)
         SendEvent("{sc01e up}")
         Sleep(700)
@@ -5722,12 +5722,12 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
         }
 
         if !(e_pr.score >= 0.7) {
-            LogToConsole("The macro can't see the E prompt (" e_pr.score "), retrying again... ", true) 
+            LogToConsole("The macro can't see the E prompt (" e_pr.score "), retrying again... ", true)
             SelectMap(readyX, readyY)
             return
         }
 
-        SendEvent("{sc012 down}") 
+        SendEvent("{sc012 down}")
         Sleep(1000)
         SendEvent("{sc012 up}")
         Sleep(500)
@@ -5738,15 +5738,15 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
             if (!LegacyMode) {
                 res := AdvancedImageSearch("Resources/searchbar.png", Round(w*0.1),0,Round(w*0.6),h,0.5,1.5)
 
-                if (res.status = "success" && res.score >= 0.6)  { 
+                if (res.status = "success" && res.score >= 0.6)  {
                     Click(res.x, res.y)
-                    foundsearchbar := true 
+                    foundsearchbar := true
                     break
-                } 
+                }
             } else {
                 res := {x: ScaleX(810), y: ScaleY(218)}
                 click(Res.x, res.y)
-                foundsearchbar := true 
+                foundsearchbar := true
                 break
             }
 
@@ -5756,8 +5756,8 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
         if (!foundsearchbar) {
             LogToConsole("Can not found the search bar in the override map menu! Reloading..", true)
             SafeReload()
-            return 
-        }        
+            return
+        }
 
         Sleep(100)
         SendText(gamemap)
@@ -5768,8 +5768,8 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
             clickedOcr := false
             if (InArray(SpecialMaps, gamemap)) {
                 SelectionICON := AdvancedImageSearch("Resources/Maps/" gamemap "_Selection.png", Round(w*0.1),0,Round(w*0.7),h,0.5,1.5)
-            
-                if (SelectionICON.score >= 0.65)  { 
+
+                if (SelectionICON.score >= 0.65)  {
                     Click(SelectionICON.x, SelectionICON.y)
                     clickedOcr := true
                 } else {
@@ -5840,15 +5840,15 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
         Sleep(200)
         ActivateRoblox()
         Sleep(100)
-        SendEvent("{sc020 down}") 
+        SendEvent("{sc020 down}")
         Sleep(1800)
         SendEvent("{sc020 up}")
         Sleep(200)
-        SendEvent("{sc01f down}") 
+        SendEvent("{sc01f down}")
         Sleep(1680)
         SendEvent("{sc01f up}")
         Sleep(300)
-        SendEvent("{sc020 down}") 
+        SendEvent("{sc020 down}")
         Sleep(1500)
         SendEvent("{sc020 up}")
         Sleep(600)
@@ -5863,10 +5863,10 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
         }
 
         if !(e_pr.score >= 0.7) {
-            LogToConsole("The macro can't see the E prompt (" e_pr.score "), moving slightly to the left... ", true) 
-            SendEvent("{sc01e down}") 
+            LogToConsole("The macro can't see the E prompt (" e_pr.score "), moving slightly to the left... ", true)
+            SendEvent("{sc01e down}")
             Sleep 300
-            SendEvent("{sc01e up}") 
+            SendEvent("{sc01e up}")
             Loop 3 {
                 e_pr := AdvancedImageSearch("Resources\e_prompt.png", 0, 0, w, h,0.6,1.5)
 
@@ -5877,12 +5877,12 @@ SelectMap(readyX := ScaleX(963), readyY := ScaleY(838)) {
                 }
             }
             if !(e_pr.score >= 0.7) {
-                LogToConsole("The macro can't see the E prompt (" e_pr.score "), reloading... ", true) 
+                LogToConsole("The macro can't see the E prompt (" e_pr.score "), reloading... ", true)
                 SafeReload()
             }
         }
 
-        SendEvent("{sc012 down}") 
+        SendEvent("{sc012 down}")
         Sleep(800)
         SendEvent("{sc012 up}")
     }
@@ -5957,7 +5957,7 @@ CheckTheMapF() {
                 FoundMap := true
                 break
             }
-            
+
             Sleep(1250)
         }
 
@@ -5971,7 +5971,7 @@ CheckTheMapF() {
     if (InArray(SpecialMaps, gamemap)) {
         functionName := gamemap . "Path"
 
-        %functionName%() 
+        %functionName%()
     }
 }
 
@@ -5989,13 +5989,13 @@ ApplyModifiers() {
     getRobloxPos(&x, &y, &w, &h)
     Loop 2 {
         res := AdvancedImageSearch("Resources/searchbar_modifiers.png", Round(w*0.1),0,Round(w*0.7),Round(h*0.6), 0.5, 1.5)
-        
-        if (res.status = "success" && res.score >= 0.7)  { 
+
+        if (res.status = "success" && res.score >= 0.7)  {
             searchX := res.x
             searchY := res.y
-            foundsearchbar := true 
+            foundsearchbar := true
             break
-          } 
+          }
         Sleep(500)
     }
 
@@ -6077,7 +6077,7 @@ activateTimescale() {
     }
 
     getRobloxPos(&x, &y, &w, &h)
-    if (UseTimeScale && difficulty != "Pizza Party" && difficulty != "Badlands II" && difficulty != "Polluted Wasteland II") { 
+    if (UseTimeScale && difficulty != "Pizza Party" && difficulty != "Badlands II" && difficulty != "Polluted Wasteland II") {
         LogToConsole("Applying timescale: " TimeScaleMode ". Please, enable UI Navigation Toggle.")
         Click(Round(w*0.5), Round(h*0.5))
 
@@ -6228,11 +6228,11 @@ AlignCamera(move := true, skipZoom := false, log := true) {
 
 getSlots() {
     static cachedSlotsState := ""
-    
+
     if (cachedSlotsState != "") {
         return cachedSlotsState
     }
-    
+
     numbers := Map(
         1, A_WorkingDir "\Resources\1.png",
         2, A_WorkingDir "\Resources\2.png",
@@ -6240,7 +6240,7 @@ getSlots() {
         4, A_WorkingDir "\Resources\4.png",
         5, A_WorkingDir "\Resources\5.png"
     )
-    
+
     Ys := ScaleY(960)
     x1 := ScaleX(800)
     x2 := ScaleX(880)
@@ -6249,10 +6249,10 @@ getSlots() {
     x5 := ScaleX(1120)
 
     currentSlotsState := Map(
-        1, [x1, Ys], 
-        2, [x2, Ys], 
-        3, [x3, Ys], 
-        4, [x4, Ys], 
+        1, [x1, Ys],
+        2, [x2, Ys],
+        3, [x3, Ys],
+        4, [x4, Ys],
         5, [x5, Ys]
     )
 
@@ -6262,15 +6262,15 @@ getSlots() {
     endX := Integer(w* 0.75)
 
     startX := Integer(w*0.15)
-    
+
     for digit, Image in numbers {
         if (!Image)
             continue
-            
-        Variation := 10 
+
+        Variation := 10
 
         Result := AdvancedImageSearch(Image, startX, offsetY, endX, endY, 0.75, 2)
-        
+
         if (Result.status == "success" && Result.score >= 0.84) {
             startX := Result.x+ScaleX(70)
             endY := Result.y+ScaleY(40)-offsetY
@@ -6291,7 +6291,7 @@ SpawnTower(X, Y, slotNumber, towerID) {
 
     X := sX(X, StrategyWidth)
     Y := sY(Y, StrategyHeight)
-    
+
     getRobloxPos(,,,&h)
     TowerY := Y
     if (Y < h * 0.5) {
@@ -6313,7 +6313,7 @@ SpawnTower(X, Y, slotNumber, towerID) {
         }
 
         ActivateRoblox()
-        
+
         if UseNumbersForHotbar {
             Send("{" slotNumber "}")
         } else {
@@ -6321,7 +6321,7 @@ SpawnTower(X, Y, slotNumber, towerID) {
         }
 
         Sleep((PotatoMode = 1) ? 100 : 30)
-        
+
         MouseMove(X, Y, A_DefaultMouseSpeed)
         Sleep((PotatoMode = 1) ? 100 : 40)
         MouseClick()
@@ -6361,12 +6361,12 @@ SpawnTower(X, Y, slotNumber, towerID) {
                 placedSuccessfully := false
 
                 ActivateRoblox()
-        
+
                 Send("{" slotNumber "}")
                 Sleep(30)
 
                 LogToConsole("Cannot place here! Trying to place tower in different spots...")
-                
+
                 for index, offset in offsets {
                     if (A_TickCount - startTime > 300000) {
                         LogToConsole("Tower placement timed out during offset retry. Executing safereload()...")
@@ -6376,7 +6376,7 @@ SpawnTower(X, Y, slotNumber, towerID) {
 
                     newX := X + offset[1]
                     newY := Y + offset[2]
-                    
+
                     MouseMove(newX, newY, A_DefaultMouseSpeed)
                     Sleep((PotatoMode = 1) ? 100 : 40)
                     MouseClick()
@@ -6390,12 +6390,12 @@ SpawnTower(X, Y, slotNumber, towerID) {
                         break 2
                     }
                 }
-                
+
                 if (!placedSuccessfully) {
                     SendEvent("{" CancelPlacementKey "}")
                     attemptMultiplier := attemptMultiplier * 2
                 }
-            } 
+            }
         }
     }
     canUseAbility := true
@@ -6418,7 +6418,7 @@ SellTower(towerID) {
     attempts := 0
     Loop {
         menuFound := waitForTowerUI()
-        
+
         if (!menuFound) {
             attempts++
             if (attempts > 15) {
@@ -6563,7 +6563,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
                 needtocheckTowerUI := false
             }
         }
-        
+
         doResV2 := (IsObject(resV2) && resV2.HasProp("score") && resV2.score > 0.55)
 
         if (doResV2) {
@@ -6580,7 +6580,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
                 Sleep(50)
                 continue
             }
-    
+
             UpgradeX := resV1.x-ScaleX(164)
             UpgradeY := resV1.y+ScaleY(383)
 
@@ -6589,13 +6589,13 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
             upgAW := ScaleX(80)
             upgAH := ScaleY(70)
         }
-        
+
         nextLevel := Towers[towerID].level + 1
 
         region := [upgAX, upgAY, upgAW, upgAH]
 
         if (path != 0 && nextLevel > pathLevel && pathLevel != 0) {
-            if (path = 2) { 
+            if (path = 2) {
                 if (doResV2) {
                     region := [resV2.x+ScaleX(20), resV2.y-ScaleY(95), ScaleX(80), ScaleY(70)]
                     UpgradeY := resV2.y-ScaleY(120)
@@ -6604,7 +6604,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
                     UpgradeY := resV1.y + ScaleY(483)
                 }
             }
-        } 
+        }
 
         XA := region[1]
         YA := region[2]
@@ -6652,11 +6652,11 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
 
             if (UseHForUpgrade) {
                 if (path != 0 && nextLevel > pathLevel && pathLevel != 0) {
-                    if (path = 1) { 
+                    if (path = 1) {
                         SendEvent("{" UpgradeTowerGKey "}")
                     } else if (path = 2) {
                     SendEvent("{" UpgradeTowerGBKey "}")
-                    } 
+                    }
                 } else {
                     SendEvent("{" UpgradeTowerGKey "}")
                 }
@@ -6713,7 +6713,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
 
             canUseAbility := true
 
-            if (upgradesDone >= totalUpgrades) 
+            if (upgradesDone >= totalUpgrades)
                 return true
 
             continue
@@ -6724,7 +6724,7 @@ UpgradeTower(towerID, skipOpen := false, totalUpgrades := 1, path := 0, pathLeve
 isDisconnected() {
     w := A_ScreenWidth
     h := A_ScreenHeight
-    
+
     getRobloxPos(,, &w, &h)
     ActivateRoblox()
     if (!w || !h || w <= 0 || h <= 0) {
@@ -6734,7 +6734,7 @@ isDisconnected() {
 
     oldMode := A_CoordModePixel
     CoordMode("Pixel", "Screen")
-    
+
     try {
         if ImageSearch(&FoundX, &FoundY, 0, 0, w, h, "*26 " "Resources\Disconnected.png") {
             CoordMode("Pixel", oldMode)
@@ -6746,7 +6746,7 @@ isDisconnected() {
     } catch Error as err {
         CoordMode("Pixel", oldMode)
     }
-    
+
     CoordMode("Pixel", oldMode)
 }
 
@@ -6893,7 +6893,7 @@ UseAbilities(*) {
     multiplier := 1
     if (TimescaleActive) {
     multiplier := TimescaleMultiplier
-    } 
+    }
 
     caravanInterval := 26
     chainInterval := 14
@@ -6997,7 +6997,7 @@ UseAbilities(*) {
         }
 
         canBeUpgraded := false
-        
+
         canUseAbility := false
         SendEvent("{" CancelPlacementKey "}")
         if (LastOpenedTowerID != "") {
@@ -7030,7 +7030,7 @@ SetDJTrack(track) {
     LogToConsole("Setting DJ track to " track "...")
     canUseAbility := false
     needtocheckTowerUI := true
-    
+
     cleanTrack := StrReplace(track, '"', '')
     cleanTrack := StrReplace(cleanTrack, "'", "")
     trackName  := Format("{:L}", cleanTrack)
@@ -7088,16 +7088,16 @@ UpdateTowerIndicator(towerID) {
     global Towers, Recording, ShowIndicators, MainGui
     if (!Recording || !ShowIndicators || !Towers.Has(towerID))
         return
-        
+
     Critical
 
     level := Towers[towerID].level
     MultiplePaths := (Towers[towerID].path != 0 && Towers[towerID].path != "")
 
     DetectHiddenWindows True
-    
+
     oldMatchMode := A_TitleMatchMode
-    SetTitleMatchMode 3 
+    SetTitleMatchMode 3
 
     tTitle := "TowerIndicator_" towerID
 
@@ -7120,13 +7120,13 @@ UpdateTowerIndicator(towerID) {
 
     clientLeft := 0
     clientTop := 0
-    
+
     getRobloxPos(,, &clientLeft, &clientTop)
-    
+
     hwnd := GetRobloxHWND()
     pt := Buffer(8, 0)
     DllCall("ClientToScreen", "UPtr", hwnd, "Ptr", pt)
-    
+
     x := NumGet(pt, 0, "Int") + Towers[towerID].x - 16
     y := NumGet(pt, 4, "Int") + Towers[towerID].y - 16
 
@@ -7134,12 +7134,12 @@ UpdateTowerIndicator(towerID) {
 
     tg := Gui(styleStr, tTitle)
     tg.BackColor := MultiplePaths ? "1A1A1A" : "FFFFFF"
-    
+
     if (MultiplePaths)
         tg.SetFont("s12 w600 cFFFFFF", "Bahnschrift")
     else
         tg.SetFont("s10 c000000", "Arial")
-    
+
     idLen := StrLen(towerID)
 
     if (idLen <= 3) {
@@ -7160,11 +7160,11 @@ UpdateTowerIndicator(towerID) {
 
     tg.SetFont("s8 norm")
     tg.Add("Text", "x0 y22 w32 h8 Center BackgroundTrans 0x200", level)
-    
+
     tg.Show("x" x " y" y " w32 h32 NoActivate")
-    
+
     WinSetTransparent(128, "ahk_id " tg.Hwnd)
-    
+
     Towers[towerID].hwnd := tg.Hwnd
 
     SetTitleMatchMode oldMatchMode
@@ -7176,14 +7176,14 @@ UpdateTowerIndicator(towerID) {
 DeleteAllIndicators() {
     global Towers
     Critical("On")
-    SetWinDelay(-1) 
+    SetWinDelay(-1)
     for id, t in Towers {
         if (t.HasProp("hwnd") && t.hwnd) {
             WinClose("ahk_id " t.hwnd)
             t.hwnd := ""
         }
     }
-    SetWinDelay(10) 
+    SetWinDelay(10)
     Critical("Off")
 }
 
@@ -7225,11 +7225,11 @@ GetNextTowerID(slot) {
     } else {
         baseName := slotArray[targetSlot]
     }
-    
+
     if (InStr(baseName, "DJ") || InStr(baseName, "DJ Booth")) {
         baseName := "DJ"
     }
-    
+
     count := 0
 
     if (IsObject(Towers)) {
@@ -7275,7 +7275,7 @@ MapToString(inputMap) {
 ShowDebugConsole() {
     global DebugConsole, OverlayHWND, OverlayBitmap, OverlayGraphics, OverlayPicHWND
     global OverlayX, OverlayY, OverlayWidth, OverlayHeight
-    
+
     if (DebugConsole != "1" && DebugConsole != 1) {
         return
     }
@@ -7291,31 +7291,31 @@ ShowDebugConsole() {
     og := Gui("+AlwaysOnTop +ToolWindow -Caption +E0x20 +E0x08000000 +E0x00000008 +LastFound")
     og.BackColor := "000000"
     og.Title     := "DebugOverlay"
-    
+
     global OverlayPicCtrl := og.Add("Picture", "x0 y0 w" OverlayWidth " h" OverlayHeight " +0xE")
     OverlayPicHWND := OverlayPicCtrl.Hwnd
     OverlayHWND    := og.Hwnd
-    
+
     og.Show("x" OverlayX " y" OverlayY " w" OverlayWidth " h" OverlayHeight " NA")
-    
+
     WinSetTransColor("0x000000", "ahk_id " OverlayHWND)
 
     OverlayBitmap   := Gdip_CreateBitmap(OverlayWidth, OverlayHeight)
     OverlayGraphics := Gdip_GraphicsFromImage(OverlayBitmap)
     Gdip_SetSmoothingMode(OverlayGraphics, 4)
-    
+
 }
 
 HideDebugConsole() {
     global OverlayHWND, OverlayBitmap, OverlayGraphics, OverlayPicHWND
-    
-    if (OverlayBitmap) { 
+
+    if (OverlayBitmap) {
         Gdip_DisposeImage(OverlayBitmap)
-        OverlayBitmap := 0 
+        OverlayBitmap := 0
     }
-    if (OverlayGraphics) { 
+    if (OverlayGraphics) {
         Gdip_DeleteGraphics(OverlayGraphics)
-        OverlayGraphics := 0 
+        OverlayGraphics := 0
     }
     if (OverlayHWND) {
         WinClose("ahk_id " OverlayHWND)
@@ -7335,12 +7335,12 @@ UpdateOverlay() {
             try {
                 Gdip_GraphicsClear(OverlayGraphics, 0x00000000)
             } catch Error as err {
-                OverlayGraphics := 0 
+                OverlayGraphics := 0
                 return
             }
         }
     }
-    
+
     fontSize := 12
     fontName := "Consolas", style := 1
     textColor := 0xFFFFFFFF
@@ -7388,9 +7388,9 @@ UpdateOverlay() {
             break
         line := LogLines[idx]
         while (StrLen(line) > 0) {
-            if (StrLen(line) * fontSize * 0.6 <= maxWidth) { 
+            if (StrLen(line) * fontSize * 0.6 <= maxWidth) {
                 wrappedLines.Push(line)
-                break 
+                break
             }
             cutPos := Floor(maxWidth / (fontSize * 0.6))
             wrappedLines.Push(SubStr(line, 1, cutPos))
@@ -7458,25 +7458,25 @@ FormatRuntime(StartTicks) {
     return (h > 0) ? Format("{:d}:{:02d}:{:02d}", h, m, s) : Format("{:d}:{:02d}", m, s)
 }
 
-claimPlaytimeRewards() { 
+claimPlaytimeRewards() {
     global CollectPlaytimeRewards, NextCheckInterval
-    
+
     if (CollectPlaytimeRewards != "1" && CollectPlaytimeRewards != 1) {
         return
     }
     Sleep(2000) ; load
-    
+
     getRobloxPos(&pX, &pY, &w, &h)
     popupColor := PixelGetColor(w - 268, pY + 5, "RGB")
     r1 := (popupColor >> 16) & 0xFF, g1 := (popupColor >> 8) & 0xFF, b1 := popupColor & 0xFF
     r2 := 0xEE, g2 := 0x18, b2 := 0x18
     diff := Sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2)
 
-    
+
     if (diff < 3) {
         LogToConsole("Claiming playtime rewards..")
         Click(w - 290, pY + 32)
-        
+
         Sleep(1000)
 
         openedMenu := false
@@ -7491,7 +7491,7 @@ claimPlaytimeRewards() {
             If (resclose.status = "success" && resclose.score >= 0.86) {
                 openedMenu := true
                 break
-            } 
+            }
             Sleep(300)
         }
 
@@ -7513,7 +7513,7 @@ claimPlaytimeRewards() {
                 If (resclose.status = "success" && resclose.score >= 0.86) {
                     openedMenu := true
                     break
-                } 
+                }
 
                 res := AdvancedImageSearch("Resources/Claim.png", Round(w * 0.25), Round(h * 0.4), Round(w * 0.5), Round(h * 0.5), 0.5, 2)
                 if (res.status = "success" && res.score >= 0.65) {
@@ -7530,28 +7530,28 @@ claimPlaytimeRewards() {
         }
 
         rewardsCollected := false
-        
+
         Loop {
             getRobloxPos(&pX, &pY, &w, &h)
-            
+
             Loop 10 {
-                if (PixelSearch(&cx, &cy, Round(w*0.25), Round(h*0.2), Round(w*0.55), Round(h*0.76), 0x64F711, 5)) 
+                if (PixelSearch(&cx, &cy, Round(w*0.25), Round(h*0.2), Round(w*0.55), Round(h*0.76), 0x64F711, 5))
                     break
-                else 
+                else
                     Sleep(100)
             }
 
             if (!PixelSearch(&cx, &cy, Round(w*0.25), Round(h*0.2), Round(w*0.55), Round(h*0.76), 0x64F711, 5)) {
                 break
             }
-            
+
             Click(cx, cy)
             rewardsCollected := true
             Sleep(500)
 
             Loop {
                 resConfirm := AdvancedImageSearch("Resources/claimreward.png", Round(w*0.25), Round(h*0.5), Round(w*0.5), Round(h*0.5),,1.5)
-                
+
                 if (resConfirm.status == "success" && resConfirm.score > 0.65) {
                     Click(resConfirm.x, resConfirm.y)
                     MouseMove(ScaleX(unfocusX), ScaleY(unfocusY))
@@ -7567,10 +7567,10 @@ claimPlaytimeRewards() {
             }
         }
 
-        Sleep(800) 
- 
+        Sleep(800)
+
         getRobloxPos(&pX, &pY, &w, &h)
-    
+
         x1 := Round(w*0.39)
         y1 := Round(h*0.36)
         x2 := Round(w*0.22)
@@ -7583,23 +7583,23 @@ claimPlaytimeRewards() {
                 break
             }
         }
-        
+
         ocrResult := OCR.FromRect(x1, y1, x2, y2, {lang: langCode, invertcolors: 1, scale: 2})
         textOnScreen := ocrResult.Text
 
         claimedCount := 0
         StrReplace(textOnScreen, "CLAIMED", , , &claimedCount)
-        
+
         if (claimedCount != 0) {
-            LogToConsole("Claimed free rewards (" . claimedCount . "/6)")   
+            LogToConsole("Claimed free rewards (" . claimedCount . "/6)")
         }
 
         if (claimedCount >= 6) {
             LogToConsole("All rewards collected! Next check in 24 hours.")
-            NextCheckInterval := 86400000 
+            NextCheckInterval := 86400000
         } else {
             LogToConsole("Not all rewards collected. Next check in 2 hours.")
-            NextCheckInterval := 7200000  
+            NextCheckInterval := 7200000
         }
 
         X1 := Round(w * 0.2)
@@ -7623,34 +7623,34 @@ UpdateDailyRewardTime() {
     if (!HasGlobal("NextCheckInterval") || NextCheckInterval == "") {
         NextCheckInterval := 7200000
     }
-      
+
     IniWrite(A_Now, StateFile, "State", "LastDailyCheck")
     IniWrite(NextCheckInterval, StateFile, "State", "NextCheckInterval")
 }
 
 CheckDailyRewardTime() {
     global StateFile
-    
+
     lastCheckTime := IniRead(StateFile, "State", "LastDailyCheck", "")
-    
+
     currentIntervalMs := Integer(IniRead(StateFile, "State", "NextCheckInterval", "7200000"))
-    
+
     if (lastCheckTime == "") {
         return true
     }
 
     intervalSeconds := currentIntervalMs / 1000
-    
+
     try {
         timeDiffSeconds := DateDiff(A_Now, lastCheckTime, "Seconds")
-        
+
         if (timeDiffSeconds >= intervalSeconds) {
             return true
         }
     } catch {
         return true
     }
-    
+
     return false
 }
 
@@ -7694,7 +7694,7 @@ SendToWebhook(message) {
 
 SendToWebhookInstant(message, embedColor := 3447003, flush := true) {
     global WebhookInstantQueue, WebhookInstantTimerActive, WebhookEnabled
-    if (!WebhookEnabled || message = "" || Trim(message) = "") { 
+    if (!WebhookEnabled || message = "" || Trim(message) = "") {
         return
     }
     if (flush) {
@@ -7702,44 +7702,44 @@ SendToWebhookInstant(message, embedColor := 3447003, flush := true) {
     }
 
     WebhookInstantQueue.Push({msg: message, color: embedColor})
-    
+
     if (!WebhookInstantTimerActive) {
         WebhookInstantTimerActive := true
         SetTimer(ProcessWebhookInstantQueue, -100)
     }
 }
 
-ProcessWebhookInstantQueue() { 
+ProcessWebhookInstantQueue() {
     global WebhookInstantQueue, WebhookInstantTimerActive, WebhookLink
 
     static whr := ComObject("WinHttp.WinHttpRequest.5.1")
 
-    if (WebhookInstantQueue.Length = 0) { 
-        WebhookInstantTimerActive := false 
-        return 
+    if (WebhookInstantQueue.Length = 0) {
+        WebhookInstantTimerActive := false
+        return
     }
-    
+
     allMessages := ""
     finalColor := 3447003
     hasCustomColor := false
-    
+
     while (WebhookInstantQueue.Length > 0) {
         item := WebhookInstantQueue.RemoveAt(1)
-        if (Trim(item.msg) = "") 
+        if (Trim(item.msg) = "")
             continue
-            
+
         allMessages .= (allMessages != "") ? "`n" item.msg : item.msg
-        
+
         if (item.color != 3447003) {
             finalColor := item.color
             hasCustomColor := true
         }
     }
-    
+
     WebhookInstantTimerActive := false
-    if (allMessages = "") 
+    if (allMessages = "")
         return
-        
+
     if (!hasCustomColor) {
         lower := Format("{:L}", allMessages)
         if (InStr(lower, "error") || InStr(lower, "failed") || InStr(lower, "reloading")) {
@@ -7750,10 +7750,10 @@ ProcessWebhookInstantQueue() {
             finalColor := 16776960
         }
     }
-    
+
     escaped := StrReplace(StrReplace(StrReplace(allMessages, "\", "\\"), '"', '\"'), "`n", "\n")
     payload := '{"embeds":[{"description":"' escaped '","color":' finalColor '}]}'
-    
+
     try {
         whr.Open("POST", WebhookLink, true)
         whr.SetRequestHeader("Content-Type", "application/json")
@@ -7768,53 +7768,53 @@ ProcessWebhookInstantQueue() {
 ProcessWebhookQueue() {
     global WebhookQueue, WebhookTimerActive, WebhookLink
     static whr := ComObject("WinHttp.WinHttpRequest.5.1")
-    
-    if (WebhookQueue.Length = 0) { 
-        WebhookTimerActive := false 
-        return 
+
+    if (WebhookQueue.Length = 0) {
+        WebhookTimerActive := false
+        return
     }
-    if (WebhookQueue.Length < 20) { 
-        SetTimer(ProcessWebhookQueue, -2000) 
-        return 
+    if (WebhookQueue.Length < 20) {
+        SetTimer(ProcessWebhookQueue, -2000)
+        return
     }
-    
+
     allMessages := ""
     Loop 20 {
-        if (WebhookQueue.Length = 0) 
+        if (WebhookQueue.Length = 0)
             break
-        
+
         msg := WebhookQueue.RemoveAt(1)
-        if (Trim(msg) = "") 
+        if (Trim(msg) = "")
             continue
-            
+
         escaped := StrReplace(msg, "\", "\\")
         escaped := StrReplace(escaped, '"', '\"')
         escaped := StrReplace(escaped, "`n", "\n")
         escaped := StrReplace(escaped, "`r", "")
-        
-        if (Trim(escaped) = "") 
+
+        if (Trim(escaped) = "")
             continue
-            
+
         allMessages .= escaped "\n"
     }
-    
-    if (allMessages = "") { 
-        WebhookTimerActive := false 
-        return 
+
+    if (allMessages = "") {
+        WebhookTimerActive := false
+        return
     }
-    
+
     allMessages := RTrim(allMessages, "\n")
-    
+
     embedColor := 9868950
     payload := '{"embeds":[{"description":"``````\n' allMessages '\n``````","color":' embedColor '}]}'
-    
+
     try {
         whr.Open("POST", WebhookLink, true)
         whr.SetRequestHeader("Content-Type", "application/json")
         whr.Send(payload)
     } catch Error {
     }
-    
+
     if (WebhookQueue.Length > 0)
         SetTimer(ProcessWebhookQueue, -1000)
     else
@@ -7824,38 +7824,38 @@ ProcessWebhookQueue() {
 
 FlushWebhookQueue() {
     global WebhookQueue, WebhookTimerActive, WebhookLink
-    
-    if (WebhookQueue.Length = 0) 
+
+    if (WebhookQueue.Length = 0)
         return
-        
+
     WebhookTimerActive := false
     SetTimer(ProcessWebhookQueue, 0)
-    
+
     allMessages := ""
     while (WebhookQueue.Length > 0) {
         msg := WebhookQueue.RemoveAt(1)
-        if (Trim(msg) = "") 
+        if (Trim(msg) = "")
             continue
 
         escaped := StrReplace(msg, "\", "\\")
         escaped := StrReplace(escaped, '"', '\"')
         escaped := StrReplace(escaped, "`n", "\n")
         escaped := StrReplace(escaped, "`r", "")
-        
-        if (Trim(escaped) = "") 
+
+        if (Trim(escaped) = "")
             continue
-            
+
         allMessages .= escaped "\n"
     }
-    
-    if (allMessages = "") 
+
+    if (allMessages = "")
         return
-        
+
     allMessages := RTrim(allMessages, "\n")
-    
+
     embedColor := 9868950
     payload := '{"embeds":[{"description":"``````\n' allMessages '\n``````","color":' embedColor '}]}'
-    
+
     try {
         whr := ComObject("WinHttp.WinHttpRequest.5.1")
         whr.Open("POST", WebhookLink, false)
@@ -7877,18 +7877,18 @@ SafeReload() {
     if (OverlayHWND) {
         WinClose("ahk_id " OverlayHWND)
     }
-    
+
     if (IsSet(MainGui) && MainGui) {
         MainGui.Destroy()
     }
-    
+
     DeleteAllIndicators()
     if (RunningStrategy) {
         currentStrat := IniRead(StateFile, "State", "Strategy", "")
         if (currentStrat != "") {
             IniWrite(1, StateFile, "State", "Running")
         }
-    } 
+    }
 
     FlushWebhookQueue()
 
@@ -7908,7 +7908,7 @@ startWatchdog() {
 
 KillSubmacros() {
     global watchdogPID
-    
+
     if (watchdogPID != "") {
         try {
             RunWait(A_ComSpec " /c taskkill /PID " watchdogPID " /F /T", , "Hide")
@@ -7916,14 +7916,14 @@ KillSubmacros() {
         }
         watchdogPID := ""
     }
-    
+
     try {
         for process in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'AutoHotkey64.exe' OR Name = 'AutoHotkey.exe' OR Name = 'AutoHotkey32.exe'") {
             try {
                 cmd := process.CommandLine
                 if (InStr(cmd, "watchdog.ahk")) {
                     try {
-                        pID := process.ProcessId 
+                        pID := process.ProcessId
                         try {
                             ProcessClose(pID)
                         }
@@ -7979,30 +7979,30 @@ CheckOcrLanguage() {
     try {
         rawLangs := OCR.GetAvailableLanguages()
         hasEnglish := false
-        
+
         availableLangs := StrSplit(rawLangs, ["`n", "`r", ",", " "])
-        
+
         for lang in availableLangs {
             if (lang = "")
                 continue
-                
+
             if InStr(lang, "en") {
                 hasEnglish := true
                 break
             }
         }
-        
+
         if (!hasEnglish) {
             msgText := "English language pack for OCR (text detection) is not installed on your system!`n`n"
                     . "Without it, the script cannot read text from the screen properly.`n`n"
                     . "Would you like to open Windows Settings to download the Language?"
-            
+
             result := MsgBox(msgText, "Missing OCR Language", 48 + 4)
-            
+
             if (result = "Yes") {
                 Run("ms-settings:regionlanguage")
             }
-            
+
             ExitApp()
         }
     }
@@ -8020,13 +8020,13 @@ SendScreenshot(pBitmap := Gdip_BitmapFromScreen(), description := "", color := 1
     if (screenshot == "0" || screenshot == 0) {
         payload_json := '{"embeds": [{"description": "' escapedDescription '", "color": ' color '}]}'
         fields.Push(Map("name", "payload_json", "content-type", "application/json", "content", payload_json))
-    } 
+    }
     else {
         payload_json := '{"embeds": [{"description": "' escapedDescription '", "color": ' color ', "image": {"url": "attachment://screenshot.png"}}]}'
         fields.Push(Map("name", "payload_json", "content-type", "application/json", "content", payload_json))
         fields.Push(Map("name", "files[0]", "filename", "screenshot.png", "content-type", "image/png", "pBitmap", pBitmap))
     }
-    
+
     CreateFormData(&postdata, &contentType, fields)
 
     if (screenshot != "0" && screenshot != 0) {
@@ -8111,20 +8111,20 @@ CreateGradientButton(w, h, r, colorStart, colorEnd, shadowColor, strokeColor, bt
     hdcMem := CreateCompatibleDC()
     obm := SelectObject(hdcMem, hbm)
     G := Gdip_GraphicsFromHDC(hdcMem)
-    
+
     DllCall("gdiplus\GdipSetInterpolationMode", "ptr", G, "int", 7)
-    
+
     pad := 6
     bx := pad, by := pad, bw := w - (pad * 2), bh := h - (pad * 2)
 
     Gdip_SetSmoothingMode(G, 4)
-    Gdip_SetTextRenderingHint(G, 4) 
+    Gdip_SetTextRenderingHint(G, 4)
 
     Loop 6 {
         alpha := Format("{:02X}", Integer(25 / A_Index))
         currentShadow := "0x" alpha SubStr(shadowColor, -6)
         pBrushShadow := Gdip_BrushCreateSolid(currentShadow)
-        
+
         offset := A_Index * 0.7
         pPathShadow := Gdip_CreateRoundRectanglePath(bx - (offset*0.5), by + offset, bw + offset, bh, r)
         Gdip_FillPath(G, pBrushShadow, pPathShadow)
@@ -8141,27 +8141,27 @@ CreateGradientButton(w, h, r, colorStart, colorEnd, shadowColor, strokeColor, bt
     Gdip_DrawPath(G, pPenStroke, pPathStroke)
     Gdip_DeletePath(pPathStroke)
     Gdip_DeletePen(pPenStroke)
-    
-    hFormat := Gdip_StringFormatCreate(0x4000) 
-    Gdip_SetStringFormatAlign(hFormat, 1)     
-    DllCall("gdiplus\GdipSetStringFormatLineAlign", "ptr", hFormat, "int", 1) 
-    
+
+    hFormat := Gdip_StringFormatCreate(0x4000)
+    Gdip_SetStringFormatAlign(hFormat, 1)
+    DllCall("gdiplus\GdipSetStringFormatLineAlign", "ptr", hFormat, "int", 1)
+
     Gdip_SetSmoothingMode(G, 0)
-    Gdip_SetTextRenderingHint(G, 0) 
+    Gdip_SetTextRenderingHint(G, 0)
 
     hFontfamily := Gdip_FontFamilyCreate(textFont)
-    hFont := Gdip_FontCreate(hFontfamily, textSize, 1) 
+    hFont := Gdip_FontCreate(hFontfamily, textSize, 1)
     RC := Buffer(16, 0)
-    
+
     NumPut("float", bx, "float", by + 1, "float", bw, "float", bh, RC)
     pBrushTxtShadow := Gdip_BrushCreateSolid("0x99000000")
-    
+
     Gdip_DrawString(G, btnText, hFont, hFormat, pBrushTxtShadow, &RC)
     Gdip_DeleteBrush(pBrushTxtShadow)
-    
+
     NumPut("float", bx, "float", by, "float", bw, "float", bh, RC)
     pBrushTxtMain := Gdip_BrushCreateSolid("0xFFFFFFFF")
-    
+
     Gdip_DrawString(G, btnText, hFont, hFormat, pBrushTxtMain, &RC)
     Gdip_DeleteBrush(pBrushTxtMain)
 
@@ -8170,12 +8170,12 @@ CreateGradientButton(w, h, r, colorStart, colorEnd, shadowColor, strokeColor, bt
     Gdip_DeleteStringFormat(hFormat)
     Gdip_DeletePath(pPathMain)
     Gdip_DeleteBrush(pBrushGrad)
-    
+
     SelectObject(hdcMem, obm)
     DeleteDC(hdcMem)
     ReleaseDC(0, hdc)
     Gdip_DeleteGraphics(G)
-    
+
     return hbm
 }
 
@@ -8215,11 +8215,11 @@ CreateScrollThumb(w, h, r, colorStart, colorEnd, glowColor) {
         pPath := Gdip_CreateRoundRectanglePath(0, A_Index*0.5, w, h, r)
         Gdip_FillPath(G, pBrush, pPath), Gdip_DeletePath(pPath), Gdip_DeleteBrush(pBrush)
     }
-    
+
     pBrushGrad := Gdip_CreateLineBrushFromRect(0, 0, w, h, colorStart, colorEnd, 1, 1)
     pPathMain := Gdip_CreateRoundRectanglePath(0, 0, w, h, r)
     Gdip_FillPath(G, pBrushGrad, pPathMain)
-    
+
     Gdip_DeletePath(pPathMain), Gdip_DeleteBrush(pBrushGrad)
     SelectObject(hdcMem, obm), DeleteDC(hdcMem), Gdip_DeleteGraphics(G)
     return hbm
@@ -8240,7 +8240,7 @@ CreateGlowButton(w, h, r, colorStart, colorEnd, glowColor) {
     Loop 5 {
         alpha := Format("{:02X}", Integer(15 - (A_Index * 2)))
         currentGlow := SubStr(glowColor, 1, 4) . alpha . SubStr(glowColor, 7)
-        
+
         pBrushGlow := Gdip_BrushCreateSolid(currentGlow)
         pPathGlow := Gdip_CreateRoundRectanglePath(bx - A_Index, by - A_Index, bw + (A_Index * 2), bh + (A_Index * 2), r)
         Gdip_FillPath(G, pBrushGlow, pPathGlow)
@@ -8262,7 +8262,7 @@ CreateGlowButton(w, h, r, colorStart, colorEnd, glowColor) {
     DeleteDC(hdcMem)
     ReleaseDC(0, hdc)
     Gdip_DeleteGraphics(G)
-    
+
     return hbm
 }
 
@@ -8281,10 +8281,10 @@ StratInfo(title := "unknown strat", author := "darksen", RequiredTowrs := "error
     text .= "-----------------------------------------`n`n"
     text .= "Required towers:`t" RequiredTowrs "`n"
     text .= "Modifiers:`t" modifs "`n`n"
-    
+
     if (desc != "")
         text .= desc "`n`n"
-        
+
     text .= "-----------------------------------------`n"
     text .= "* To edit the strategy, open the strat file in the notepad.`n"
 
@@ -8503,13 +8503,13 @@ ProcessCommands(*) {
                 "\n!start - start the macro"
             )
         }
-        
+
         else if (content == "!screenshot") {
             pBitmap := Gdip_BitmapFromScreen()
             Discord.SendScreenshot(pBitmap, "Requested Screenshot")
             Gdip_DisposeImage(pBitmap)
         }
-        
+
         else if (content == "!status") {
             status := "stopped"
             if (RunningStrategy)
@@ -8518,7 +8518,7 @@ ProcessCommands(*) {
             savedCoins := IniRead(StateFile, "State", "Coins", 0)
             savedGems := IniRead(StateFile, "State", "Gems", 0)
             savedExp := IniRead(StateFile, "State", "EXP", 0)
-            
+
             totalTriumphs := IniRead(StateFile, "State", "TotalTriumphs", 0)
             totalLosses := IniRead(StateFile, "State", "TotalLosses", 0)
             totalMatches := totalTriumphs + totalLosses
@@ -8538,11 +8538,11 @@ ProcessCommands(*) {
                     expPerHour := Round(savedExp / elapsedHours)
                 }
             }
-            
+
             currentStrategy := IniRead(StateFile, "State", "Strategy", "")
 
             SplitPath(currentStrategy, &stratName)
-            
+
             if (RunningStrategy) {
                 statusMsg := "**Macro Status:** Working\n"
                 statusMsg .= "**Runtime:** " runtime "\n\n"
@@ -8580,6 +8580,6 @@ ProcessCommands(*) {
             }
         }
     }
-    
+
     command_buffer := []
 }
